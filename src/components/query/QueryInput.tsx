@@ -1,0 +1,71 @@
+import { LoaderCircle } from "lucide-react";
+import type { KeyboardEvent } from "react";
+import { Button } from "../ui/Button";
+
+export function QueryInput({
+  value,
+  onChange,
+  onSubmit,
+  busy = false,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  onSubmit: () => void;
+  busy?: boolean;
+}) {
+  const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      if (!busy && value.trim()) {
+        onSubmit();
+      }
+    }
+  };
+
+  return (
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSubmit();
+      }}
+      className="rounded-xl border border-line bg-surface p-3 shadow-sm transition-colors focus-within:border-accent/50 sm:p-4"
+    >
+      <label htmlFor="rag-query" className="sr-only">
+        Ask your knowledge base
+      </label>
+      <textarea
+        id="rag-query"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        onKeyDown={handleKeyDown}
+        rows={2}
+        spellCheck={false}
+        placeholder="Ask your knowledge base…"
+        className="w-full resize-none bg-transparent text-base leading-relaxed text-ink placeholder:text-faint focus:outline-none sm:text-lg"
+      />
+      <div className="mt-2 flex items-center justify-between gap-3">
+        <p className="hidden font-mono text-[11px] text-faint sm:block">
+          Enter to run · Shift+Enter for a new line
+        </p>
+        <Button
+          type="submit"
+          disabled={busy || !value.trim()}
+          className="w-full sm:w-auto"
+        >
+          {busy ? (
+            <LoaderCircle size={15} className="animate-spin" aria-hidden="true" />
+          ) : null}
+          {busy ? "Running…" : "Ask"}
+          {!busy && (
+            <kbd
+              aria-hidden="true"
+              className="rounded border border-white/30 px-1.5 font-mono text-[10px] leading-4"
+            >
+              ↵
+            </kbd>
+          )}
+        </Button>
+      </div>
+    </form>
+  );
+}

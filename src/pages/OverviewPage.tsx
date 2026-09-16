@@ -11,10 +11,8 @@ import { PageHeader } from "../components/ui/PageHeader";
 import { StatusBadge } from "../components/ui/StatusBadge";
 import { Pipeline } from "../components/pipeline/Pipeline";
 import { RecentQueriesTable } from "../components/query/RecentQueriesTable";
-import {
-  mockOverviewMetrics,
-  mockRecentQueries,
-} from "../data/mockOverview";
+import { mockOverviewMetrics } from "../data/mockOverview";
+import { mockRecentQueries } from "../data/mockQueries";
 import { mockPipelineStages } from "../data/mockPipeline";
 
 const metricIcons: Record<string, LucideIcon> = {
