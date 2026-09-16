@@ -18,3 +18,7 @@ dist
 
 # Agent tooling
 .atl/
+backend/data/
+backend/.venv/
+__pycache__/
+.pytest_cache/

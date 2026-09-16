@@ -1,0 +1,112 @@
+FIELDSTONE — OPERATIONS HANDBOOK (SAMPLE DOCUMENT)
+
+This is a fictional document included with RAG Inspector so you can try
+document ingestion and chunking immediately. Any resemblance to a real
+company is purely coincidental.
+
+1. ABOUT THE APPROVAL PROCESS
+
+Every request that changes a shared system, spends company budget, or
+touches customer data must go through the approval process. A request is
+anything a team member formally submits through the internal portal: a
+purchase, an access change, a deployment, or a data export.
+
+The approval process begins when a requester submits a complete form. A
+form is complete when it includes a description, an estimated cost when
+relevant, the responsible area, and a business reason. Incomplete forms
+are returned to the requester with a short explanation.
+
+The responsible area must review each request before it is forwarded to
+the designated approver for final sign-off. The responsible area is the
+team that owns the system, budget line, or data affected by the request.
+
+The designated approver is assigned by role, never by name. When a person
+changes teams, approvals follow the role, not the person.
+
+2. WHO CAN APPROVE A REQUEST
+
+Requests are approved by the manager of the responsible area. Requests
+above the local budget threshold are escalated to the department head.
+Requests that touch customer data are additionally reviewed by the
+security lead before approval.
+
+No one can approve their own request. If the only possible approver is
+the requester, the request is automatically escalated one level up.
+
+Delegated approvals are allowed only in writing, only for a limited
+period, and only to a person with equivalent or higher responsibility.
+
+3. RESPONSE TIMES
+
+The target response time for a first review is two business days. The
+target for final approval is five business days from submission.
+
+Requests that sit untouched for more than five business days are flagged
+as overdue and appear in the weekly operations report. Requesters can
+nudge an approval once per request; repeated nudging is not encouraged
+because the report already shows every overdue item.
+
+Emergency requests follow the same rules but are approved through the
+phone escalation path described in section six.
+
+4. RESPONSIBILITIES
+
+The requester is responsible for submitting complete information and for
+reporting when an approved change is actually executed.
+
+The responsible area is responsible for reviewing the technical and
+business fit of the request, and for keeping documentation updated after
+the change is made.
+
+The approver is responsible for decisions, for record-keeping, and for
+escalating anything that looks outside policy.
+
+The operations team is responsible for the health of the approval system
+itself, for the weekly report, and for auditing a random sample of closed
+requests every month.
+
+5. PROCEDURES AFTER APPROVAL
+
+After approval, the responsible area executes the request and closes the
+ticket in the tracking system. Closing the ticket requires a one-paragraph
+summary of what changed and where it can be verified.
+
+After approval, documentation must be updated within ten business days:
+runbooks, access lists, and diagrams, as applicable.
+
+After approval, the requester receives a notification with the final
+decision, the approver's role, and the planned execution window.
+
+If an approved request is abandoned, the requester must close it with the
+reason "no longer needed" so that capacity planning stays accurate.
+
+6. ESCALATION PATH
+
+When a request is blocked, the requester raises a flag in the tracking
+system. The responsible area has one business day to respond to a flag.
+
+If the responsible area and the requester disagree, the department head
+decides. The decision is recorded in the ticket with a short rationale.
+
+If a request involves a suspected security incident, the normal process
+is suspended and the incident runbook takes over immediately. Security
+escalations are never blocked by budget limits or approval queues.
+
+7. AUDIT AND EXCEPTIONS
+
+All approvals are logged: who asked, who reviewed, who approved, when,
+and what changed. The log is immutable.
+
+Exceptions to the approval process are rare, time-boxed, and require
+department head sign-off. An exception that is renewed twice is a signal
+that the policy itself should change.
+
+8. SMALL PRINT
+
+Requests below the petty threshold still need a reviewer but not an
+approver. Access reviews happen quarterly regardless of how an access
+grant was approved. This handbook is reviewed every six months, and
+changes to the approval process are announced at least two weeks before
+they take effect.
+
+END OF SAMPLE DOCUMENT
