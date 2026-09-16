@@ -12,7 +12,7 @@
     <script>
       (function () {
         try {
-          var stored = localStorage.getItem("rag-inspector:theme");
+          var stored = (localStorage.getItem("rag-inspector:theme") || "").replace(/"/g, "");
           var dark = stored
             ? stored === "dark"
             : window.matchMedia("(prefers-color-scheme: dark)").matches;
