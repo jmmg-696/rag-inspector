@@ -11,10 +11,12 @@ export function StatusBadge({
   label,
   tone = "neutral",
   pulse = false,
+  className,
 }: {
   label: string;
   tone?: StatusBadgeTone;
   pulse?: boolean;
+  className?: string;
 }) {
   const dot: Record<StatusBadgeTone, string> = {
     neutral: "bg-faint",
@@ -27,7 +29,8 @@ export function StatusBadge({
     <span
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full border border-line px-2.5 py-1",
-        "font-mono text-[11px] uppercase tracking-wide text-muted"
+        "font-mono text-[11px] uppercase tracking-wide text-muted",
+        className
       )}
     >
       <span className="relative flex h-1.5 w-1.5">
