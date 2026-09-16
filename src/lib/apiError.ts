@@ -29,6 +29,26 @@ const errorKeys: Record<string, { titleKey: TranslationKey; bodyKey: Translation
     titleKey: "error.network.title",
     bodyKey: "error.network.body",
   },
+  vector_store_unavailable: {
+    titleKey: "error.vector_store_unavailable.title",
+    bodyKey: "error.vector_store_unavailable.body",
+  },
+  embedding_model_unavailable: {
+    titleKey: "error.embedding_model_unavailable.title",
+    bodyKey: "error.embedding_model_unavailable.body",
+  },
+  embedding_failed: {
+    titleKey: "error.embedding_failed.title",
+    bodyKey: "error.embedding_failed.body",
+  },
+  already_running: {
+    titleKey: "error.already_running.title",
+    bodyKey: "error.already_running.body",
+  },
+  collection_mismatch: {
+    titleKey: "error.collection_mismatch.title",
+    bodyKey: "error.collection_mismatch.body",
+  },
   unknown: {
     titleKey: "error.unknown.title",
     bodyKey: "error.unknown.body",

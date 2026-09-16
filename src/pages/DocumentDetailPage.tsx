@@ -6,6 +6,7 @@ import { ChunkSettingsPanel } from "../components/chunking/ChunkSettingsPanel";
 import { ChunkStrip } from "../components/chunking/ChunkStrip";
 import { OverlapExplainer } from "../components/chunking/OverlapExplainer";
 import { ExtractedText } from "../components/documents/ExtractedText";
+import { EmbeddingsTab } from "../components/embeddings/EmbeddingsTab";
 import { IngestionPipeline } from "../components/documents/IngestionPipeline";
 import { Card } from "../components/ui/Card";
 import { ConceptCard } from "../components/ui/ConceptCard";
@@ -17,18 +18,20 @@ import { StatusBadge } from "../components/ui/StatusBadge";
 import { useI18n } from "../hooks/useI18n";
 import { errorKeysFor } from "../lib/apiError";
 import { buttonStyles } from "../lib/buttonStyles";
+import { isProcessingStatus } from "../lib/pipelineStatus";
 import { formatChunkCount } from "../lib/format";
 import { ApiError, documentService } from "../services/documentService";
 import type { ChunksResponse, DocumentDetail } from "../types/domain";
 import { cn } from "../lib/cn";
 import type { TranslationKey } from "../i18n";
 
-type Tab = "overview" | "text" | "chunks";
+type Tab = "overview" | "text" | "chunks" | "embeddings";
 
 const TABS: { id: Tab; labelKey: TranslationKey }[] = [
   { id: "overview", labelKey: "detail.tab.overview" },
   { id: "text", labelKey: "detail.tab.text" },
   { id: "chunks", labelKey: "detail.tab.chunks" },
+  { id: "embeddings", labelKey: "detail.tab.embeddings" },
 ];
 
 function BackLink() {
@@ -50,6 +53,7 @@ export default function DocumentDetailPage() {
   const [detail, setDetail] = useState<DocumentDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(true);
   const [detailErrorCode, setDetailErrorCode] = useState<string | null>(null);
+  const [retryingEmbeddings, setRetryingEmbeddings] = useState(false);
   const [tab, setTab] = useState<Tab>("overview");
   const [chunkSize, setChunkSize] = useState(512);
   const [chunkOverlap, setChunkOverlap] = useState(100);
@@ -124,6 +128,31 @@ export default function DocumentDetailPage() {
     setChunksLoading(true);
     setSelectedChunk(0);
     setChunkOverlap(overlap);
+  };
+
+  const processing = detail !== null && isProcessingStatus(detail.status);
+  const documentKey = detail?.id ?? "";
+
+  useEffect(() => {
+    if (!processing) return;
+    const interval = window.setInterval(() => {
+      documentService
+        .get(documentKey)
+        .then(setDetail)
+        .catch(() => undefined);
+    }, 1500);
+    return () => window.clearInterval(interval);
+  }, [documentKey, processing]);
+
+  const retryEmbeddings = () => {
+    setRetryingEmbeddings(true);
+    documentService
+      .reindex(documentKey)
+      .then((summary) =>
+        setDetail((prev) => (prev ? { ...prev, ...summary } : prev))
+      )
+      .catch(() => undefined)
+      .finally(() => setRetryingEmbeddings(false));
   };
 
   if (detailLoading) {
@@ -258,9 +287,26 @@ export default function DocumentDetailPage() {
       {tab === "overview" && (
         <div id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" className="space-y-6">
           <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
-            <Card title={t("detail.ingest.title")}>
+            <Card
+              title={t("detail.ingest.title")}
+              actions={
+                detail.status === "error" ? (
+                  <Button
+                    variant="secondary"
+                    onClick={retryEmbeddings}
+                    disabled={retryingEmbeddings}
+                    className="h-8 px-3 text-xs"
+                  >
+                    {t("documents.retryEmbed")}
+                  </Button>
+                ) : undefined
+              }
+            >
               <div className="px-4 py-4 sm:px-5">
-                <IngestionPipeline />
+                <IngestionPipeline
+                  status={detail.status}
+                  errorCode={detail.errorCode}
+                />
               </div>
             </Card>
             <Card title={t("detail.cleaning.title")}>
@@ -394,6 +440,16 @@ export default function DocumentDetailPage() {
               />
             )
           )}
+        </div>
+      )}
+
+      {tab === "embeddings" && (
+        <div
+          id="panel-embeddings"
+          role="tabpanel"
+          aria-labelledby="tab-embeddings"
+        >
+          <EmbeddingsTab detail={detail} />
         </div>
       )}
     </div>

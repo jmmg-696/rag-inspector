@@ -1,5 +1,6 @@
 import {
   BookOpen,
+  Boxes,
   Binary,
   FileText,
   FlaskConical,
@@ -22,6 +23,7 @@ export const primaryNav: NavItem[] = [
   { labelKey: "nav.documents", to: "/documents", icon: FileText },
   { labelKey: "nav.playground", to: "/playground", icon: FlaskConical },
   { labelKey: "nav.retrieval", to: "/retrieval", icon: Radar },
+  { labelKey: "nav.vectorStore", to: "/vector-store", icon: Boxes },
   { labelKey: "nav.evaluation", to: "/evaluation", icon: Gauge },
 ];
 

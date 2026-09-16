@@ -345,7 +345,124 @@ export const en = {
   "emptyPipeline.body":
     "Upload a document to see how RAG turns raw files into searchable chunks.",
   "emptyPipeline.future": "Future phases",
-  "emptyPipeline.upload": "Upload document"
+  "emptyPipeline.upload": "Upload document",
+
+  "common.embeddings": "Embeddings",
+  "common.indexed": "Indexed",
+  "common.pending": "Pending",
+  "common.dimensions": "Dimensions",
+  "common.distance": "Distance",
+  "common.collection": "Collection",
+  "common.viewVector": "View vector",
+  "common.hideVector": "Hide vector",
+  "common.status.uploaded": "Uploaded",
+  "common.status.extracting": "Extracting",
+  "common.status.cleaning": "Cleaning",
+  "common.status.chunking": "Chunking",
+  "common.status.embedding": "Embedding",
+  "common.status.indexing": "Indexing",
+  "common.status.error": "Error",
+
+  "nav.vectorStore": "Vector Store",
+
+  "overview.metric.embeddings": "Embeddings",
+  "overview.metric.documentsLiveHint": "local backend",
+  "overview.metric.chunksLiveHint": "per upload settings",
+  "overview.metric.embeddingsHint": "BGE-M3 · local",
+  "overview.metric.vectorsLiveHint": "Qdrant · Cosine",
+  "overview.vectorStore.title": "Vector Store",
+  "overview.vectorStore.vectors": "{count} vectors",
+  "overview.vectorStore.dimensions": "{count} dimensions",
+  "overview.vectorStore.open": "Open Vector Store",
+
+  "vectorStore.connected": "Connected",
+  "vectorStore.disconnected": "Unavailable",
+
+  "detail.tab.embeddings": "Embeddings",
+  "detail.ingest.embed.label": "Embed",
+  "detail.ingest.embed.why":
+    "Every chunk is converted into a vector by the local embedding model — numbers that capture meaning.",
+  "detail.ingest.index.label": "Index",
+  "detail.ingest.index.why":
+    "Vectors land in Qdrant together with their metadata, so retrieval can later find them by meaning.",
+  "embeddings.generated": "{embedded} / {total} generated",
+  "embeddings.model": "Model",
+  "embeddings.vectorStore": "Vector store",
+  "embeddings.dimensionsValue": "{count} dimensions",
+  "embeddings.listTitle": "Vectors per chunk",
+  "embeddings.chunkLabel": "Chunk #{index}",
+  "embeddings.flowCaption": "{count} dimensions",
+  "embeddings.notIndexed":
+    "This chunk is not indexed yet — embed the document first.",
+  "embeddings.previewNote":
+    "Preview — freshly computed by the local model, not stored.",
+  "embeddings.previewing": "Embedding…",
+  "embeddings.previewButton": "Compute fresh preview",
+  "embeddings.storedVector": "Stored vector",
+  "embeddings.dimensionsExplain":
+    "Each chunk is represented using {count} numerical values. Together, they form its vector representation.",
+  "embeddings.whatTitle": "What is an embedding?",
+  "embeddings.whatBody":
+    "An embedding converts text into a numerical representation that captures semantic information. Similar meanings tend to produce vectors that are closer together.",
+  "embeddings.whyTitle": "Why?",
+  "embeddings.whyEmbeddings":
+    "Computers cannot directly compare the meaning of paragraphs. Embeddings represent text as vectors so mathematical similarity can be used.",
+  "embeddings.whyVectorStore":
+    "A vector database stores embeddings together with metadata so relevant information can later be retrieved efficiently.",
+  "embeddings.whyCosineTitle": "Why cosine?",
+  "embeddings.whyCosine":
+    "Cosine similarity compares the direction of vectors rather than their magnitude. It is commonly used to measure semantic similarity between embeddings.",
+  "embeddings.dimensionTooltip": "Dimension {index} · {value}",
+  "embeddings.heatmapHint":
+    "Each cell is one dimension — a view of the numbers, not a semantic map.",
+  "embeddings.heatmapTitle": "VECTOR",
+
+  "vectorStore.title": "Vector Store",
+  "vectorStore.description":
+    "See how your chunks are stored as vectors.",
+  "vectorStore.stat.vectors": "Vectors",
+  "vectorStore.stat.dimensions": "Dimensions",
+  "vectorStore.stat.documents": "Documents",
+  "vectorStore.stat.avgChunks": "Avg chunks/document",
+  "vectorStore.stat.indexed": "Indexed",
+  "vectorStore.empty.title": "No vectors yet",
+  "vectorStore.empty.body":
+    "Upload a document and RAG Inspector will embed and index every chunk.",
+  "vectorStore.offline.title": "Vector store unavailable",
+  "vectorStore.offline.body":
+    "Start Qdrant locally and try again: docker compose up -d",
+  "vectorStore.retry": "Retry connection",
+  "vectorStore.browserTitle": "Indexed chunks",
+  "vectorStore.browserHint": "Click a vector to inspect it.",
+  "vectorStore.pagePosition": "Showing {shown} of {total}",
+  "vectorStore.pointPosition": "Chunk #{index} · Page {page}",
+  "vectorStore.openDocument": "Open document",
+  "vectorStore.space.title": "Semantic Space",
+  "vectorStore.space.body":
+    "Each point represents a document chunk. The original embeddings contain {dimensions} dimensions. This visualization projects them into 2D so we can visually explore relationships between chunks.",
+  "vectorStore.space.method": "Projection: {method} · {shown} of {total} vectors",
+  "vectorStore.space.legendChunk": "Each point = 1 chunk",
+  "vectorStore.space.legendSame": "Closer points = more similar meaning",
+  "vectorStore.space.empty":
+    "Index a few chunks to see the semantic space.",
+
+  "documents.retryEmbed": "Retry embeddings",
+
+  "error.vector_store_unavailable.title": "Vector store unavailable",
+  "error.vector_store_unavailable.body":
+    "Start Qdrant locally and try again.",
+  "error.embedding_model_unavailable.title": "Embedding model unavailable",
+  "error.embedding_model_unavailable.body":
+    "Make sure the local embedding model can be loaded.",
+  "error.embedding_failed.title": "Embedding failed",
+  "error.embedding_failed.body":
+    "The document chunks were created, but their vectors could not be generated.",
+  "error.already_running.title": "Already processing",
+  "error.already_running.body":
+    "This document is already being processed.",
+  "error.collection_mismatch.title": "Dimension mismatch",
+  "error.collection_mismatch.body":
+    "The Qdrant collection was created with a different embedding model. Delete the collection or switch back to index again."
 } as const;
 
 export type TranslationKey = keyof typeof en;

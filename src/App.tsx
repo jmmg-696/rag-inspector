@@ -11,6 +11,7 @@ import NotFoundPage from "./pages/NotFoundPage";
 import OverviewPage from "./pages/OverviewPage";
 import PlaygroundPage from "./pages/PlaygroundPage";
 import RetrievalPage from "./pages/RetrievalPage";
+import VectorStorePage from "./pages/VectorStorePage";
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
               />
               <Route path="playground" element={<PlaygroundPage />} />
               <Route path="retrieval" element={<RetrievalPage />} />
+              <Route path="vector-store" element={<VectorStorePage />} />
               <Route path="evaluation" element={<EvaluationPage />} />
               <Route path="learn" element={<LearnPage />} />
               <Route path="*" element={<NotFoundPage />} />

@@ -347,5 +347,122 @@ export const es: TranslationDictionary = {
   "emptyPipeline.body":
     "Subí un documento para ver cómo RAG convierte archivos crudos en chunks buscables.",
   "emptyPipeline.future": "Próximas fases",
-  "emptyPipeline.upload": "Subir documento"
+  "emptyPipeline.upload": "Subir documento",
+
+  "common.embeddings": "Embeddings",
+  "common.indexed": "Indexado",
+  "common.pending": "Pendiente",
+  "common.dimensions": "Dimensiones",
+  "common.distance": "Distancia",
+  "common.collection": "Colección",
+  "common.viewVector": "Ver vector",
+  "common.hideVector": "Ocultar vector",
+  "common.status.uploaded": "Subido",
+  "common.status.extracting": "Extrayendo",
+  "common.status.cleaning": "Limpiando",
+  "common.status.chunking": "Fragmentando",
+  "common.status.embedding": "Generando embeddings",
+  "common.status.indexing": "Indexando",
+  "common.status.error": "Error",
+
+  "nav.vectorStore": "Vector Store",
+
+  "overview.metric.embeddings": "Embeddings",
+  "overview.metric.documentsLiveHint": "backend local",
+  "overview.metric.chunksLiveHint": "según configuración de subida",
+  "overview.metric.embeddingsHint": "BGE-M3 · local",
+  "overview.metric.vectorsLiveHint": "Qdrant · Cosine",
+  "overview.vectorStore.title": "Vector Store",
+  "overview.vectorStore.vectors": "{count} vectores",
+  "overview.vectorStore.dimensions": "{count} dimensiones",
+  "overview.vectorStore.open": "Abrir Vector Store",
+
+  "vectorStore.connected": "Conectado",
+  "vectorStore.disconnected": "No disponible",
+
+  "detail.tab.embeddings": "Embeddings",
+  "detail.ingest.embed.label": "Embedding",
+  "detail.ingest.embed.why":
+    "Cada chunk se convierte en un vector mediante el modelo de embeddings local: números que capturan el significado.",
+  "detail.ingest.index.label": "Indexación",
+  "detail.ingest.index.why":
+    "Los vectores se guardan en Qdrant junto con sus metadatos, para que la recuperación pueda encontrarlos por significado en la Fase 4.",
+  "embeddings.generated": "{embedded} / {total} generados",
+  "embeddings.model": "Modelo",
+  "embeddings.vectorStore": "Almacén de vectores",
+  "embeddings.dimensionsValue": "{count} dimensiones",
+  "embeddings.listTitle": "Vectores por chunk",
+  "embeddings.chunkLabel": "Chunk #{index}",
+  "embeddings.flowCaption": "{count} dimensiones",
+  "embeddings.notIndexed":
+    "Este chunk todavía no está indexado: primero generá los embeddings del documento.",
+  "embeddings.previewNote":
+    "Vista previa — calculada por el modelo local, no almacenada.",
+  "embeddings.previewing": "Calculando embedding…",
+  "embeddings.previewButton": "Calcular vista previa",
+  "embeddings.storedVector": "Vector almacenado",
+  "embeddings.dimensionsExplain":
+    "Cada chunk se representa con {count} valores numéricos. En conjunto forman su representación vectorial.",
+  "embeddings.whatTitle": "¿Qué es un embedding?",
+  "embeddings.whatBody":
+    "Un embedding convierte el texto en una representación numérica que captura información semántica. Los textos con significados similares tienden a producir vectores más cercanos.",
+  "embeddings.whyTitle": "¿Por qué?",
+  "embeddings.whyEmbeddings":
+    "Las computadoras no pueden comparar directamente el significado de dos párrafos. Los embeddings representan el texto como vectores, y así se puede usar similitud matemática.",
+  "embeddings.whyVectorStore":
+    "Una base de datos vectorial guarda embeddings junto con sus metadatos, para luego recuperar la información relevante de forma eficiente.",
+  "embeddings.whyCosineTitle": "¿Por qué coseno?",
+  "embeddings.whyCosine":
+    "La similitud coseno compara la dirección de los vectores, no su magnitud. Es la medida habitual para similitud semántica entre embeddings.",
+  "embeddings.dimensionTooltip": "Dimensión {index} · {value}",
+  "embeddings.heatmapHint":
+    "Cada celda es una dimensión — una vista de los números, no un mapa semántico.",
+  "embeddings.heatmapTitle": "VECTOR",
+
+  "vectorStore.title": "Vector Store",
+  "vectorStore.description":
+    "Vé cómo se almacenan tus chunks como vectores.",
+  "vectorStore.stat.vectors": "Vectores",
+  "vectorStore.stat.dimensions": "Dimensiones",
+  "vectorStore.stat.documents": "Documentos",
+  "vectorStore.stat.avgChunks": "Chunks promedio por documento",
+  "vectorStore.stat.indexed": "Indexado",
+  "vectorStore.empty.title": "Todavía no hay vectores",
+  "vectorStore.empty.body":
+    "Subí un documento y RAG Inspector generará e indexará los embeddings de cada chunk.",
+  "vectorStore.offline.title": "Almacén de vectores no disponible",
+  "vectorStore.offline.body":
+    "Iniciá Qdrant en local y reintentá: docker compose up -d",
+  "vectorStore.retry": "Reintentar conexión",
+  "vectorStore.browserTitle": "Chunks indexados",
+  "vectorStore.browserHint": "Hacé clic en un vector para inspeccionarlo.",
+  "vectorStore.pagePosition": "Mostrando {shown} de {total}",
+  "vectorStore.pointPosition": "Chunk #{index} · Página {page}",
+  "vectorStore.openDocument": "Abrir documento",
+  "vectorStore.space.title": "Espacio semántico",
+  "vectorStore.space.body":
+    "Cada punto representa un fragmento del documento. Los embeddings originales contienen {dimensions} dimensiones. Esta visualización los proyecta a 2D para explorar visualmente la relación entre los fragmentos.",
+  "vectorStore.space.method": "Proyección: {method} · {shown} de {total} vectores",
+  "vectorStore.space.legendChunk": "Cada punto = 1 chunk",
+  "vectorStore.space.legendSame": "Puntos más cercanos = significados más parecidos",
+  "vectorStore.space.empty":
+    "Indexá algunos chunks para ver el espacio semántico.",
+
+  "documents.retryEmbed": "Reintentar embeddings",
+
+  "error.vector_store_unavailable.title": "Almacén de vectores no disponible",
+  "error.vector_store_unavailable.body":
+    "Iniciá Qdrant en local y reintentá.",
+  "error.embedding_model_unavailable.title": "Modelo de embeddings no disponible",
+  "error.embedding_model_unavailable.body":
+    "Asegurate de que el modelo de embeddings local pueda cargarse.",
+  "error.embedding_failed.title": "Fallo de embeddings",
+  "error.embedding_failed.body":
+    "Los chunks del documento se crearon, pero no se pudieron generar sus vectores.",
+  "error.already_running.title": "Ya se está procesando",
+  "error.already_running.body":
+    "Este documento ya está siendo procesado.",
+  "error.collection_mismatch.title": "Dimensiones que no coinciden",
+  "error.collection_mismatch.body":
+    "La colección de Qdrant se creó con un modelo de embeddings distinto. Borrá la colección o volvé al modelo anterior para indexar de nuevo."
 };

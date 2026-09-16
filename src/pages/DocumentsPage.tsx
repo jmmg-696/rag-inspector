@@ -16,6 +16,7 @@ import { Skeleton } from "../components/ui/Skeleton";
 import { UploadModal } from "../components/documents/UploadModal";
 import { useI18n } from "../hooks/useI18n";
 import { errorKeysFor } from "../lib/apiError";
+import { isProcessingStatus } from "../lib/pipelineStatus";
 import { ApiError, documentService } from "../services/documentService";
 import { mockDocuments } from "../data/mockDocuments";
 import type { DocumentSummary, KnowledgeDocument } from "../types/domain";
@@ -33,10 +34,11 @@ export default function DocumentsPage() {
     null
   );
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [busyId, setBusyId] = useState<string | null>(null);
 
   const refresh = useCallback(() => {
-    documentService.health().then((online) => {
-      if (!online) {
+    documentService.health().then((info) => {
+      if (!info || info.api !== "ok") {
         setStatus("offline");
         return;
       }
@@ -60,6 +62,35 @@ export default function DocumentsPage() {
   useEffect(() => {
     refresh();
   }, [refresh]);
+
+  const processing = useMemo(
+    () => documents.some((doc) => isProcessingStatus(doc.status)),
+    [documents]
+  );
+
+  useEffect(() => {
+    if (!processing || status !== "online") return;
+    const interval = window.setInterval(() => {
+      documentService
+        .list()
+        .then(setDocuments)
+        .catch(() => undefined);
+    }, 1500);
+    return () => window.clearInterval(interval);
+  }, [processing, status]);
+
+  const handleRetryEmbeddings = (documentId: string) => {
+    setBusyId(documentId);
+    documentService
+      .reindex(documentId)
+      .then((summary) =>
+        setDocuments((prev) =>
+          prev.map((doc) => (doc.id === documentId ? summary : doc))
+        )
+      )
+      .catch(() => refresh())
+      .finally(() => setBusyId(null));
+  };
 
   const term = filter.trim().toLowerCase();
   const realFiltered = useMemo(
@@ -188,7 +219,11 @@ export default function DocumentsPage() {
                 noResults
               ) : (
                 <div className="rounded-xl border border-line bg-surface shadow-sm">
-                  <RealDocumentTable documents={realFiltered} />
+                  <RealDocumentTable
+                  documents={realFiltered}
+                  busyId={busyId}
+                  onRetry={handleRetryEmbeddings}
+                />
                 </div>
               )}
             </>

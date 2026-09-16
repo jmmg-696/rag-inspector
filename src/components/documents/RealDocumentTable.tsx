@@ -1,11 +1,10 @@
 import { Link } from "react-router-dom";
-import { FileText } from "lucide-react";
+import { FileText, RefreshCw } from "lucide-react";
 import { useI18n } from "../../hooks/useI18n";
 import type { DocumentSummary } from "../../types/domain";
+import { pipelineStatusMeta } from "../../lib/pipelineStatus";
 import { formatChunkCount, relativeTime } from "../../lib/format";
 import { StatusBadge } from "../ui/StatusBadge";
-import { documentStatusMeta } from "../../lib/documentStatus";
-import type { DocumentStatus } from "../../types/domain";
 
 const th =
   "px-4 py-2.5 text-left font-mono text-[10px] font-medium uppercase tracking-widest text-faint first:pl-5";
@@ -13,13 +12,17 @@ const td = "px-4 py-3 text-sm text-muted first:pl-5";
 
 export function RealDocumentTable({
   documents,
+  busyId,
+  onRetry,
 }: {
   documents: DocumentSummary[];
+  busyId: string | null;
+  onRetry: (documentId: string) => void;
 }) {
   const { t, language } = useI18n();
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[760px] border-collapse">
+      <table className="w-full min-w-[820px] border-collapse">
         <caption className="sr-only">{t("documents.caption")}</caption>
         <thead>
           <tr className="border-b border-line">
@@ -29,16 +32,19 @@ export function RealDocumentTable({
             <th scope="col" className={`${th} w-20`}>
               {t("common.table.type")}
             </th>
-            <th scope="col" className={`${th} w-20`}>
+            <th scope="col" className={`${th} w-16`}>
               {t("common.table.pages")}
             </th>
-            <th scope="col" className={`${th} w-24`}>
+            <th scope="col" className={`${th} w-20`}>
               {t("common.words")}
             </th>
-            <th scope="col" className={`${th} w-24`}>
-              {t("common.table.chunks")}
+            <th scope="col" className={`${th} w-20`}>
+              {t("common.chunks")}
             </th>
-            <th scope="col" className={`${th} w-28`}>
+            <th scope="col" className={`${th} w-24`}>
+              {t("common.embeddings")}
+            </th>
+            <th scope="col" className={`${th} w-40`}>
               {t("evaluation.table.status")}
             </th>
             <th scope="col" className={`${th} w-32`}>
@@ -48,11 +54,7 @@ export function RealDocumentTable({
         </thead>
         <tbody>
           {documents.map((document) => {
-            const status = documentStatusMeta[
-              (document.status === "ready"
-                ? "ready"
-                : document.status) as DocumentStatus
-            ];
+            const status = pipelineStatusMeta[document.status];
             return (
               <tr
                 key={document.id}
@@ -67,14 +69,8 @@ export function RealDocumentTable({
                       <FileText size={15} aria-hidden="true" />
                     </span>
                     <span className="min-w-0">
-                      <span className="flex items-center gap-2">
-                        <span className="truncate text-sm font-medium text-ink underline-offset-4 group-hover:underline">
-                          {document.name}
-                        </span>
-                        <StatusBadge
-                          label={t("documents.badge.local")}
-                          tone="accent"
-                        />
+                      <span className="block truncate text-sm font-medium text-ink underline-offset-4 group-hover:underline">
+                        {document.name}
                       </span>
                       <span className="mt-0.5 block font-mono text-[11px] text-faint">
                         {document.chunkSize}{" "}
@@ -94,12 +90,33 @@ export function RealDocumentTable({
                 <td className={`${td} font-mono`}>
                   {formatChunkCount(document.chunkCount)}
                 </td>
+                <td className={`${td} font-mono`}>
+                  {formatChunkCount(document.embeddingCount)}
+                </td>
                 <td className={td}>
-                  <StatusBadge
-                    label={t(status.labelKey)}
-                    tone={status.tone}
-                    pulse={status.pulse}
-                  />
+                  <span className="flex items-center gap-2">
+                    <StatusBadge
+                      label={t(status.labelKey)}
+                      tone={status.tone}
+                      pulse={status.pulse}
+                    />
+                    {document.status === "error" && (
+                      <button
+                        type="button"
+                        onClick={() => onRetry(document.id)}
+                        disabled={busyId === document.id}
+                        title={t("documents.retryEmbed")}
+                        aria-label={`${t("documents.retryEmbed")}: ${document.name}`}
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-line text-muted transition-colors hover:bg-elevated hover:text-ink disabled:opacity-50"
+                      >
+                        <RefreshCw
+                          size={12}
+                          aria-hidden="true"
+                          className={busyId === document.id ? "animate-spin" : undefined}
+                        />
+                      </button>
+                    )}
+                  </span>
                 </td>
                 <td className={td}>
                   {relativeTime(document.createdAt, language)}

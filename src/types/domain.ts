@@ -17,6 +17,25 @@ export interface CleaningStats {
   removedArtifacts: number;
 }
 
+export type PipelineStatus =
+  | "uploaded"
+  | "extracting"
+  | "cleaning"
+  | "chunking"
+  | "embedding"
+  | "indexing"
+  | "ready"
+  | "error";
+
+export const ACTIVE_PIPELINE_STATUSES: PipelineStatus[] = [
+  "uploaded",
+  "extracting",
+  "cleaning",
+  "chunking",
+  "embedding",
+  "indexing",
+];
+
 export interface DocumentSummary {
   id: string;
   name: string;
@@ -24,10 +43,15 @@ export interface DocumentSummary {
   pageCount: number;
   characters: number;
   words: number;
-  status: string;
+  status: PipelineStatus;
   chunkSize: number;
   chunkOverlap: number;
   chunkCount: number;
+  embeddingCount: number;
+  embeddingVersion: string;
+  indexedAt: string;
+  errorCode: string;
+  errorMessage: string;
   cleaning: CleaningStats;
   createdAt: string;
 }
@@ -64,6 +88,77 @@ export interface ChunksResponse {
 
 export const CHUNK_SIZES = [128, 256, 512, 1024] as const;
 export const CHUNK_OVERLAPS = [0, 50, 100, 200] as const;
+
+export interface HealthInfo {
+  api: string;
+  qdrant: string;
+  embeddingModel: string;
+}
+
+export interface EmbeddingModelMeta {
+  model: string;
+  provider: string;
+  device: string;
+  dimensions: number | null;
+  status: string;
+}
+
+export interface VectorStatus {
+  connected: boolean;
+  collection: string;
+  vectors: number;
+  dimensions: number | null;
+  distance: string;
+  errorCode: string;
+}
+
+export interface VectorStats {
+  vectors: number;
+  dimensions: number | null;
+  documents: number;
+  totalChunks: number;
+  embeddedChunks: number;
+  indexedPercent: number;
+  averageChunksPerDocument: number;
+}
+
+export interface VectorPoint {
+  id: string;
+  documentId: string;
+  documentName: string;
+  chunkId: string;
+  chunkIndex: number;
+  pageStart: number;
+  pageEnd: number;
+  estimatedTokens: number;
+}
+
+export interface VectorPointList {
+  total: number;
+  points: VectorPoint[];
+}
+
+export interface VectorDetail extends VectorPoint {
+  text: string;
+  dimensions: number;
+  vector: number[];
+}
+
+export interface SpacePoint {
+  pointId: string;
+  x: number;
+  y: number;
+  documentId: string;
+  documentName: string;
+  chunkIndex: number;
+  pageStart: number;
+}
+
+export interface SemanticSpace {
+  method: string;
+  dimensions: number;
+  points: SpacePoint[];
+}
 
 export type StageIconKey =
   | "documents"

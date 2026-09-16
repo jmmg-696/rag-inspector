@@ -74,7 +74,11 @@ def _ensure_model() -> None:
             settings.EMBEDDING_MODEL_NAME, device=device()
         )
         _state.model = model
-        _state.dimensions = int(model.get_sentence_embedding_dimension())
+        if hasattr(model, "get_embedding_dimension"):
+            dimensions: int = model.get_embedding_dimension()
+        else:  # sentence-transformers < 6
+            dimensions = model.get_sentence_embedding_dimension()
+        _state.dimensions = int(dimensions)
         _state.error_message = ""
         _state.status = "ready"
     except Exception as error:  # noqa: BLE001
