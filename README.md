@@ -17,19 +17,20 @@ out. The interesting part — the actual *retrieval* — is hidden.
 layers: **what happened** (the real numbers) and **why it matters** (the human
 explanation).
 
-As of **Phase 2**, the front of the pipeline is real: upload a local PDF,
-DOCX, TXT or Markdown document and watch it become cleaned, page-mapped,
-deterministic chunks — with a visual chunking explorer you can retune live.
+As of **Phase 3**, half the pipeline is real and local: upload a document and
+watch it become cleaned text → deterministic chunks → genuine BGE-M3
+embeddings → indexed vectors in Qdrant — with a 2D projection of your own
+embedding space you can explore.
 
 ```text
 Documents  →  Chunking  →  Embeddings  →  Vector Store  →  Retrieval  →  Context  →  Local LLM  →  Answer
-  ● real       ● real        ○ next phase     ○ planned        ○ mock        ○ mock       ○ mock       ○ mock
+  ● real       ● real        ● real          ● real           ○ next        ○ mock       ○ mock       ○ mock
 ```
 
-Everything runs locally. No embeddings, no Qdrant, no Ollama and no answer
-generation yet — those are deliberately reserved for later phases.
+No external AI APIs, no cloud services. Retrieval and answer generation are
+deliberately still mocked — that's Phase 4.
 
-## Current Pipeline (Phase 2)
+## Current Pipeline (Phase 3)
 
 ```text
 DOCUMENT
@@ -40,30 +41,63 @@ CLEANING
     ↓
 CHUNKING
     ↓
-CHUNKS
+EMBEDDINGS
+    ↓
+QDRANT
 ```
 
-Phase 2 focuses on making document ingestion and chunking visible and
-understandable. Embeddings and retrieval will be introduced in the next
-phases.
+## Embeddings
+
+RAG Inspector uses a local embedding model to convert document chunks into
+numerical vector representations.
+
+- Model: **BAAI/bge-m3** (1,024 dimensions) via sentence-transformers
+- Runs on CPU; CUDA is used automatically when available
+- The model loads once per backend process and is reused for every request
+- Embeddings and indexing run in the background after chunking, with visible
+  progress states (`embedding → indexing → ready`) and retry on failure
+- Point ids are deterministic: same document + same chunk settings → same
+  vectors, no duplicates; changing chunk settings regenerates cleanly
+
+## Vector Store
+
+Vectors are stored locally in Qdrant using cosine distance.
+
+- Collection `rag_inspector` is created automatically (1,024-dim, Cosine)
+- Every vector carries its payload: document, chunk index, page range, text
+  and token estimate — ready for Phase 4 retrieval
+- Deleting a document deletes its vectors too; no orphans
+- The **Vector Store** page shows connection state, statistics, an indexed
+  chunk browser and per-vector inspection with a value heatmap
+
+## Semantic Space
+
+The application includes a 2D PCA visualization of the embedding space to
+make semantic relationships easier to understand.
+
+Each point is one chunk, projected server-side from 1,024 dimensions to 2.
+The UI says so explicitly — this is a *projection* for exploring
+relationships, not the actual vector space.
 
 ## Features
 
-- **Documents** — real local ingestion: upload PDF/DOCX/TXT/MD, see per-page
-  extracted text, cleaning statistics and every generated chunk
+- **Documents** — real local ingestion: PDF/DOCX/TXT/MD upload with live
+  pipeline states (upload → extract → clean → chunk → embed → index),
+  per-document embeddings counts and retry on failure
 - **Visual Chunking Explorer** — watch a document split into overlapping
   chunks; change chunk size and overlap and the visualization reacts
-- **Ingestion pipeline** — Upload → Extract → Clean → Chunk → Ready, with a
-  plain-language explanation under each step
-- **Overview** — the RAG pipeline with available / current-phase / planned
-  stage states, corpus metrics and query history
-- **Playground** — simulated question → answer run with clickable sources
-- **Retrieval Inspector** — ranked chunks with similarity bars (mocked)
-- **Evaluation** — quality dashboard, clearly labeled as demo data
+- **Embeddings tab** — generated/total, model metadata, chunk → vector →
+  Qdrant flow, stored vectors fetched straight from the collection, and a
+  compact heatmap of every dimension
+- **Vector Store page** — Qdrant status, corpus statistics, indexed chunk
+  browser, vector detail with heatmap, and the PCA semantic space
+- **Overview** — pipeline with real / next-phase / planned stage states and
+  live metrics when the local backend is running
+- **Playground / Retrieval / Evaluation** — still mock, clearly labeled
 - **Learn** — visual step-by-step explanation of how RAG works
 - **English / Spanish** — full UI translation, persisted, no reload
-- Light and dark themes, responsive layout, keyboard accessibility,
-  reduced-motion support — all local, zero external requests
+- Light/dark themes, responsive layout, keyboard accessibility,
+  reduced-motion support — zero external requests at runtime
 
 ## Screenshots
 
@@ -72,40 +106,40 @@ phases.
 | | |
 |---|---|
 | `public/screenshots/overview.png` | Overview with the RAG pipeline |
-| `public/screenshots/documents.png` | Ingested documents |
 | `public/screenshots/chunking.png` | Visual chunking explorer |
-| `public/screenshots/playground.png` | A question travelling through the pipeline |
+| `public/screenshots/embeddings.png` | Vector heatmap |
+| `public/screenshots/semantic-space.png` | PCA semantic space |
 
 ## Architecture
 
 ```text
-├── src/                     frontend (React + TS + Vite + Tailwind v4)
-│   ├── types/               domain types
-│   ├── i18n/                en.ts / es.ts / provider (typed keys, no scattered strings)
-│   ├── services/            documentService — the seam for the backend
-│   ├── data/                remaining mock data (queries, retrieval, evaluation…)
-│   ├── lib/                 tiny pure helpers
-│   ├── hooks/  theme/
-│   ├── components/          layout · ui · pipeline · documents · chunking ·
-│   │                        query · retrieval · sources · evaluation · learn
-│   └── pages/               one file per route
-└── backend/                 FastAPI (see backend/README.md)
-    └── app/                 api · services (extraction, cleaning, chunking,
-                             document) · models · schemas
+React  →  /api (Vite proxy)  →  FastAPI
+                                   ├─ document services (extract/clean/chunk)
+                                   ├─ embedding service ── BGE-M3 (local)
+                                   └─ vector store service ── Qdrant (Docker)
 ```
 
-The frontend talks to the backend **only** through `src/services/documentService.ts`
-(Vite proxies `/api` → `http://localhost:8000`). The remaining mock modules
-(`mockQueries`, `mockRetrieval`, `mockEvaluation`) will be replaced by the
-same service pattern when retrieval and generation land.
+```text
+├── src/                        frontend (React + TS + Vite + Tailwind v4)
+│   ├── types/                  domain types
+│   ├── i18n/                   en.ts / es.ts / provider (typed keys)
+│   ├── services/               http · documentService · vectorStoreService
+│   ├── data/                   remaining mock data (playground, retrieval…)
+│   ├── lib/  hooks/  theme/
+│   ├── components/             layout · ui · pipeline · documents · chunking
+│   │                           · embeddings · vectors · retrieval · …
+│   └── pages/                  incl. /vector-store and /documents/:id
+└── backend/                    FastAPI (see backend/README.md)
+    └── app/
+        ├── settings.py         model/collection/ports — defined once
+        ├── api/                documents · embeddings · vectors
+        └── services/           extraction · cleaning · chunking · document
+                                · embedding · vector_store (Qdrant lives here)
+```
 
-Tokens are approximated at ~4 characters per token until a real tokenizer
-arrives with the embeddings phase — the UI says so explicitly wherever it
-matters.
-
-### Planned (not implemented yet)
-
-`Ollama` for local generation · `Qdrant` for vectors · `BGE-M3` embeddings.
+Boundaries matter: `document_service` never imports Qdrant, `embedding_service`
+owns the model, and **only** `vector_store_service` talks to Qdrant. Phase 4
+retrieval plugs into the same seams.
 
 ## Roadmap
 
@@ -120,55 +154,59 @@ matters.
 - [x] Chunking engine
 - [x] Visual chunking explorer
 - [x] English / Spanish
+- [x] Local embeddings
+- [x] Qdrant integration
+- [x] Vector visualization
+- [x] Semantic space
 
-- [ ] Embeddings
-- [ ] Qdrant integration
 - [ ] Semantic retrieval
+- [ ] Top-K search
+- [ ] Query similarity
 - [ ] Ollama integration
 - [ ] Real RAG generation
 - [ ] Source citations
 - [ ] RAG vs No-RAG
-- [ ] Chunking experiments
 - [ ] Evaluation
 
 ## Local Development
 
-Requires Node.js 20+ and Python 3.11+.
-
-**Frontend**
+Requires Node.js 20+, Python 3.11+ and Docker (for Qdrant).
 
 ```bash
-npm install
-npm run dev        # http://localhost:5173
-npm run build      # type-check + production build
-npm run lint
-```
+# 1. Vector store
+docker compose up -d
 
-**Backend** (needed for the Documents page; everything else runs on mock data)
-
-```bash
+# 2. Backend
 cd backend
 python -m venv .venv && .venv/Scripts/activate   # Windows
 # source .venv/bin/activate                      # macOS / Linux
-pip install -r requirements.txt
+pip install -r requirements.txt                  # torch resolves to the CPU build
 uvicorn app.main:app --reload --port 8000
+
+# 3. Frontend (new terminal, repo root)
+npm install
+npm run dev
 ```
+
+First document ingestion after startup loads BGE-M3 once (the model weights
+are downloaded to the Hugging Face cache the first time, then reused).
 
 Try it immediately with the fictional sample: `examples/sample-handbook.txt`.
 
-With the backend offline, Documents shows demo data and says so — no silent
-degradation.
+With the backend offline, Documents shows demo data and says so. With Qdrant
+offline, ingestion still works and indexing is marked failed — with retry.
 
 ## Tech Stack
 
 - React 19 + TypeScript (strict)
-- Vite
-- Tailwind CSS v4 (CSS-first theme, class-based dark mode)
-- React Router v7 · Lucide icons
-- FastAPI + PyMuPDF + python-docx (backend)
-- pytest for the ingestion pipeline
+- Vite · Tailwind CSS v4 · React Router v7 · Lucide icons
+- FastAPI + PyMuPDF + python-docx
+- sentence-transformers (BAAI/bge-m3, local CPU/CUDA) + Qdrant (Docker)
+- Server-side PCA with NumPy · hand-rolled SVG scatter (no chart library)
+- pytest (unit tests run hermetically: fake embedder + in-process Qdrant)
 
-No UI kit, no animation library, no state manager. Intentionally.
+No UI kit, no animation library, no state manager, no chart dependency.
+Intentionally.
 
 ## Why RAG Inspector?
 
