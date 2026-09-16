@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { cn } from "../../lib/cn";
 
 export function MetricCard({
   label,
@@ -25,7 +24,7 @@ export function MetricCard({
       <p className="mt-3 font-mono text-3xl font-semibold tracking-tight text-ink">
         {value}
       </p>
-      {hint && <p className={cn("mt-1.5 text-xs text-muted")}>{hint}</p>}
+      {hint && <p className="mt-1.5 text-xs text-muted">{hint}</p>}
     </div>
   );
 }

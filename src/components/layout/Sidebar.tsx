@@ -5,7 +5,7 @@ import { LogoMark } from "./Logo";
 import { NavList } from "./NavList";
 import { ThemeToggle } from "./ThemeToggle";
 
-export const SIDEBAR_COLLAPSED_KEY = "rag-inspector:sidebar-collapsed";
+const SIDEBAR_COLLAPSED_KEY = "rag-inspector:sidebar-collapsed";
 
 export function Sidebar() {
   const [collapsed, setCollapsed] = useLocalStorage(

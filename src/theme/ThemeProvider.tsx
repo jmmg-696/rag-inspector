@@ -1,10 +1,9 @@
-import { useCallback, useEffect, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import {
   THEME_STORAGE_KEY,
   ThemeContext,
   type Theme,
 } from "./context";
-import { useLocalStorage } from "../hooks/useLocalStorage";
 
 function readInitialTheme(): Theme {
   try {
@@ -20,18 +19,20 @@ function readInitialTheme(): Theme {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useLocalStorage<Theme>(
-    THEME_STORAGE_KEY,
-    readInitialTheme()
-  );
+  const [theme, setTheme] = useState<Theme>(readInitialTheme);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
+    try {
+      window.localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(theme));
+    } catch {
+      /* storage unavailable */
+    }
   }, [theme]);
 
   const toggleTheme = useCallback(() => {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
-  }, [setTheme]);
+  }, []);
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
