@@ -17,20 +17,23 @@ out. The interesting part — the actual *retrieval* — is hidden.
 layers: **what happened** (the real numbers) and **why it matters** (the human
 explanation).
 
-As of **Phase 3**, half the pipeline is real and local: upload a document and
-watch it become cleaned text → deterministic chunks → genuine BGE-M3
-embeddings → indexed vectors in Qdrant — with a 2D projection of your own
-embedding space you can explore.
+As of **Phase 4**, six of the eight pipeline stages are real and local. Ask a
+question and watch it become a BGE-M3 query embedding, a cosine top-K search
+in Qdrant and a ranked set of chunks — projected in the same 2D semantic
+space, with your query as a star.
 
 ```text
-Documents  →  Chunking  →  Embeddings  →  Vector Store  →  Retrieval  →  Context  →  Local LLM  →  Answer
-  ● real       ● real        ● real          ● real           ○ next        ○ mock       ○ mock       ○ mock
+Documents → Chunking → Embeddings → Vector Store → Retrieval → Context → Local LLM → Answer
+  ● real      ● real      ● real        ● real        ● real      ○ Phase 5  ○ Phase 5    ○ Phase 5
 ```
 
-No external AI APIs, no cloud services. Retrieval and answer generation are
-deliberately still mocked — that's Phase 4.
+> **Phase 4 implements real semantic retrieval. LLM answer generation is
+> intentionally deferred to Phase 5** — the Playground stops at the real
+> retrieved context, and it says so.
 
-## Current Pipeline (Phase 3)
+No external AI APIs, no cloud services.
+
+## Current Pipeline (Phase 4)
 
 ```text
 DOCUMENT
@@ -41,9 +44,56 @@ CLEANING
     ↓
 CHUNKING
     ↓
-EMBEDDINGS
+EMBEDDINGS (BGE-M3, local)
     ↓
-QDRANT
+QDRANT (local)
+    ↓
+USER QUESTION → QUERY EMBEDDING → COSINE TOP-K → RANKED CHUNKS
+```
+
+## Semantic Retrieval
+
+Phase 4 makes retrieval real:
+
+```text
+USER QUESTION
+    ↓
+BGE-M3 query embedding (same model, same space as the chunks)
+    ↓
+Qdrant cosine top-K search
+    ↓
+Ranked chunks with similarity scores
+```
+
+- **Top-K** (1–20) and a **similarity threshold** (0–1) are user-controlled
+- Retrieval can be **filtered to a single document**
+- Every score is the **actual cosine similarity from Qdrant** — a retrieval
+  similarity score, never a confidence score, never a probability
+- The Retrieval page overlays the query star on the PCA semantic space and
+  highlights exactly the top-K points that Qdrant returned
+- No results is a legitimate outcome — the UI explains what to try instead,
+  it never invents matches
+
+**Retrieval is not generation.** Retrieval answers "which of my documents
+are closest in meaning to this question?" — a mathematical comparison of
+vectors. Generation answers "what sentence should the user read?" — that
+needs an LLM, and it is Phase 5. RAG Inspector keeps the two visibly apart
+so you can debug one without guessing about the other.
+
+```jsonc
+// POST /api/retrieval/search
+{ "query": "How does the approval process work?", "topK": 3 }
+
+// →
+{
+  "query": "How does the approval process work?",
+  "queryEmbedding": { "model": "BAAI/bge-m3", "dimensions": 1024 },
+  "results": [
+    { "rank": 1, "score": 0.7075, "documentName": "sample-handbook.txt",
+      "chunkIndex": 0, "text": "FIELDSTONE — OPERATIONS HANDBOOK …" }
+  ],
+  "corpusSize": 3
+}
 ```
 
 ## Embeddings
@@ -91,9 +141,16 @@ relationships, not the actual vector space.
   compact heatmap of every dimension
 - **Vector Store page** — Qdrant status, corpus statistics, indexed chunk
   browser, vector detail with heatmap, and the PCA semantic space
+- **Retrieval Inspector** — now REAL: ask a question, watch the honest
+  stage-by-stage run (embed query → search Qdrant), get ranked chunks with
+  actual cosine scores, per-result “Why was this retrieved?” explanations,
+  a query vector heatmap, and your query projected as a star in the
+  semantic space with the top-K points highlighted
+- **Playground** — real retrieval end to end: question → query embedding →
+  Qdrant top-K → assembled context, and then an honest stop: *LLM
+  generation — Phase 5*. No fabricated answers
 - **Overview** — pipeline with real / next-phase / planned stage states and
   live metrics when the local backend is running
-- **Playground / Retrieval / Evaluation** — still mock, clearly labeled
 - **Learn** — visual step-by-step explanation of how RAG works
 - **English / Spanish** — full UI translation, persisted, no reload
 - Light/dark themes, responsive layout, keyboard accessibility,
@@ -116,7 +173,10 @@ relationships, not the actual vector space.
 React  →  /api (Vite proxy)  →  FastAPI
                                    ├─ document services (extract/clean/chunk)
                                    ├─ embedding service ── BGE-M3 (local)
-                                   └─ vector store service ── Qdrant (Docker)
+                                   ├─ vector store service ── Qdrant (Docker)
+                                   └─ retrieval service (embeds query via the
+                                      existing singleton, searches via the
+                                      existing store boundary)
 ```
 
 ```text
@@ -132,14 +192,16 @@ React  →  /api (Vite proxy)  →  FastAPI
 └── backend/                    FastAPI (see backend/README.md)
     └── app/
         ├── settings.py         model/collection/ports — defined once
-        ├── api/                documents · embeddings · vectors
+        ├── api/                documents · embeddings · vectors · retrieval
         └── services/           extraction · cleaning · chunking · document
                                 · embedding · vector_store (Qdrant lives here)
+                                · retrieval (search + projected query space)
 ```
 
 Boundaries matter: `document_service` never imports Qdrant, `embedding_service`
-owns the model, and **only** `vector_store_service` talks to Qdrant. Phase 4
-retrieval plugs into the same seams.
+owns the model, **only** `vector_store_service` talks to Qdrant, and
+`retrieval_service` reuses those two without duplicating any of them. Phase 5
+(context assembly + Ollama) plugs into the same seams.
 
 ## Roadmap
 
@@ -158,10 +220,10 @@ retrieval plugs into the same seams.
 - [x] Qdrant integration
 - [x] Vector visualization
 - [x] Semantic space
+- [x] Semantic retrieval
+- [x] Top-K search
+- [x] Query similarity
 
-- [ ] Semantic retrieval
-- [ ] Top-K search
-- [ ] Query similarity
 - [ ] Ollama integration
 - [ ] Real RAG generation
 - [ ] Source citations

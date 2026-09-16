@@ -1,14 +1,18 @@
 # RAG Inspector — Backend
 
-Local RAG pipeline services. Phases 2–3 are real; everything past the
-vector store is deliberately mocked in the frontend.
+Local RAG pipeline services. Phases 2–4 are real (ingestion → chunking →
+embeddings → Qdrant → semantic retrieval); answer generation is
+deliberately not here yet.
 
 ```text
 UPLOAD → EXTRACT → CLEAN → CHUNK → EMBED → INDEX → READY
+
+QUESTION → QUERY EMBEDDING (same BGE-M3) → QDRANT COSINE TOP-K → RANKED CHUNKS
 ```
 
-No external AI APIs. The embedding model and the vector database both run
-on your machine.
+No external AI APIs. The embedding model, the vector database and retrieval
+all run on your machine. Answer generation (Phase 5) is intentionally NOT
+here.
 
 ## Services (clear boundaries)
 
@@ -19,7 +23,8 @@ on your machine.
 | `chunking_service` | deterministic window chunking | — |
 | `document_service` | orchestration + JSON-file storage + indexing pipeline | chunking, embedding, vector store |
 | `embedding_service` | loads BGE-M3 **once** (lazy singleton), encodes chunks and queries, exposes model metadata | sentence-transformers, torch |
-| `vector_store_service` | **the only** Qdrant client: collection, upsert, scroll, delete, PCA | qdrant-client |
+| `vector_store_service` | **the only** Qdrant client: collection, upsert, scroll, **cosine search**, delete, PCA | qdrant-client |
+| `retrieval_service` | question → query embedding (via the existing singleton) → Qdrant top-K → ranked results; also projects the query into the PCA space | embedding, vector store |
 
 `app/settings.py` centralizes model name, collection, distance, ports and
 limits — nothing is hardcoded elsewhere.
@@ -100,6 +105,26 @@ cache (one time, a few minutes).
 | GET | `/api/vectors/semantic-space` | server-side PCA (NumPy) projection → 2D points |
 | DELETE | `/api/vectors/document/{document_id}` | drop one document's vectors |
 
+### Retrieval
+
+| Method | Path | Purpose |
+|---|---|---|
+| POST | `/api/retrieval/search` | `{query, topK (1–20), scoreThreshold (0–1), documentId?, includeEmbedding?}` → ranked hits with **real Qdrant cosine scores** |
+| POST | `/api/retrieval/semantic-space` | same params → PCA points + the query's 2D position + `retrieved`/`score` flags per point |
+
+Scores are retrieval similarity — never confidence, correctness or
+probability. Empty corpora return `corpusSize: 0` with zero results rather
+than an error; Qdrant failures return a stable 503 `vector_store_unavailable`
+and the model failing returns 502/503 — never a silent fallback.
+
+Example:
+
+```bash
+curl -X POST http://localhost:8000/api/retrieval/search \
+  -H "Content-Type: application/json" \
+  -d '{"query": "How does the approval process work?", "topK": 3}'
+```
+
 Error codes: `unsupported_type`, `empty_document`, `invalid_file`,
 `too_large`, `invalid_settings`, `not_found`,
 `vector_store_unavailable`, `embedding_model_unavailable`,
@@ -129,10 +154,13 @@ The suite covers extraction per format, validation, chunk size/overlap and
 determinism, model metadata, preview determinism and point-id stability
 across versions, collection creation and dimension mismatch, upsert /
 scroll / retrieve / delete, document vector cleanup, full re-index
-idempotency, the extended health endpoint and the Qdrant-unavailable state.
+idempotency, the extended health endpoint and the Qdrant-unavailable state,
+plus semantic retrieval: score ordering, Top-K limits, similarity
+thresholds, document filtering, empty corpus, validation bounds, embedding
+and store failure modes, and the projected query space.
 
 ## What comes next
 
-Phase 4: question → query embedding → Qdrant top-K search → context →
-Ollama. The payload schema stored with every vector is already designed for
-it.
+Phase 5: assemble the retrieved chunks into a prompt → generate locally with
+Ollama → citations. The retrieval API from Phase 4 and the payload schema on
+every vector are exactly the seams it plugs into.

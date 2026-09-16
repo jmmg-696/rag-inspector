@@ -1,32 +1,7 @@
-import type { RagAnswer, RecentQuery, SourceReference } from "../types/domain";
+import type { RecentQuery } from "../types/domain";
 
 export const mockDefaultQuestion =
   "What is the approval process for a request?";
-
-export const mockAnswer: RagAnswer = {
-  text: "The request must first be reviewed by the responsible area and then approved by the designated approver.",
-  model: "llama3.2:3b",
-  latencyMs: 412,
-};
-
-export const mockSources: SourceReference[] = [
-  {
-    id: "src-01",
-    document: "Approval Process.pdf",
-    page: 14,
-    similarity: 0.94,
-    snippet:
-      "The responsible area must review each request before it is forwarded to the designated approver for final sign-off.",
-  },
-  {
-    id: "src-02",
-    document: "Company Procedures.pdf",
-    page: 8,
-    similarity: 0.89,
-    snippet:
-      "Requests require approval from a designated approver before they can be executed or scheduled.",
-  },
-];
 
 export const mockRecentQueries: RecentQuery[] = [
   {

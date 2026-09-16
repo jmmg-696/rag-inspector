@@ -49,6 +49,10 @@ const errorKeys: Record<string, { titleKey: TranslationKey; bodyKey: Translation
     titleKey: "error.collection_mismatch.title",
     bodyKey: "error.collection_mismatch.body",
   },
+  validation: {
+    titleKey: "error.validation.title",
+    bodyKey: "error.validation.body",
+  },
   unknown: {
     titleKey: "error.unknown.title",
     bodyKey: "error.unknown.body",

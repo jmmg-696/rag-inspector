@@ -8,11 +8,15 @@ export function QueryInput({
   onChange,
   onSubmit,
   busy = false,
+  placeholderText,
+  submitLabel,
 }: {
   value: string;
   onChange: (value: string) => void;
   onSubmit: () => void;
   busy?: boolean;
+  placeholderText?: string;
+  submitLabel?: string;
 }) {
   const { t } = useI18n();
   const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -33,7 +37,7 @@ export function QueryInput({
       className="rounded-xl border border-line bg-surface p-3 shadow-sm transition-colors focus-within:border-accent/50 sm:p-4"
     >
       <label htmlFor="rag-query" className="sr-only">
-        {t("playground.placeholder")}
+        {placeholderText ?? t("playground.placeholder")}
       </label>
       <textarea
         id="rag-query"
@@ -42,7 +46,7 @@ export function QueryInput({
         onKeyDown={handleKeyDown}
         rows={2}
         spellCheck={false}
-        placeholder={t("playground.placeholder")}
+        placeholder={placeholderText ?? t("playground.placeholder")}
         className="w-full resize-none bg-transparent text-base leading-relaxed text-ink placeholder:text-faint focus:outline-none sm:text-lg"
       />
       <div className="mt-2 flex items-center justify-between gap-3">
@@ -57,7 +61,7 @@ export function QueryInput({
           {busy ? (
             <LoaderCircle size={15} className="animate-spin" aria-hidden="true" />
           ) : null}
-          {busy ? t("playground.running") : t("playground.ask")}
+          {busy ? t("playground.running") : (submitLabel ?? t("playground.ask"))}
           {!busy && (
             <kbd
               aria-hidden="true"

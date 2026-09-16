@@ -1,88 +1,103 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { FlaskConical } from "lucide-react";
+import { useCallback, useState } from "react";
+import { Link } from "react-router-dom";
+import { AlertTriangle, FlaskConical } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { EmptyState } from "../components/ui/EmptyState";
 import { PageHeader } from "../components/ui/PageHeader";
 import { StatusBadge } from "../components/ui/StatusBadge";
-import { PipelineStep, type StepState } from "../components/pipeline/PipelineStep";
+import {
+  PipelineStep,
+  type StepState,
+} from "../components/pipeline/PipelineStep";
 import { QueryInput } from "../components/query/QueryInput";
-import { SourceCard } from "../components/sources/SourceCard";
-import { getRagRun } from "../data/mockPlaygroundRun";
-import { mockQueryPipelineStages } from "../data/mockPipeline";
-import { mockDefaultQuestion } from "../data/mockQueries";
 import { useI18n } from "../hooks/useI18n";
 import { usePipelineStages } from "../hooks/usePipelineStages";
-import type { RagRunResult } from "../types/domain";
+import { errorKeysFor } from "../lib/apiError";
+import { buttonStyles } from "../lib/buttonStyles";
+import { ApiError } from "../services/documentService";
+import { retrievalService } from "../services/retrievalService";
+import { mockQueryPipelineStages } from "../data/mockPipeline";
+import { mockDefaultQuestion } from "../data/mockQueries";
+import type { RetrievalHit, RetrievalSearchResponse } from "../types/domain";
 
-type RunPhase = "idle" | "running" | "done";
+const TOP_K = 5;
 
-const STEP_DURATIONS_MS = [420, 380, 460, 360, 900, 420];
+type Phase = "idle" | "running" | "done";
 
 export default function PlaygroundPage() {
   const { t } = useI18n();
-  const navigate = useNavigate();
   const stages = usePipelineStages(mockQueryPipelineStages);
   const [question, setQuestion] = useState(mockDefaultQuestion);
-  const [phase, setPhase] = useState<RunPhase>("idle");
-  const [step, setStep] = useState(0);
-  const [result, setResult] = useState<RagRunResult | null>(null);
-  const timersRef = useRef<number[]>([]);
-
-  const clearTimers = useCallback(() => {
-    timersRef.current.forEach((id) => window.clearTimeout(id));
-    timersRef.current = [];
-  }, []);
-
-  useEffect(() => clearTimers, [clearTimers]);
+  const [phase, setPhase] = useState<Phase>("idle");
+  const [result, setResult] = useState<RetrievalSearchResponse | null>(null);
+  const [errorCode, setErrorCode] = useState<string | null>(null);
+  const [searchedOnce, setSearchedOnce] = useState(false);
 
   const handleRun = () => {
-    clearTimers();
-    setResult(getRagRun(question));
-    setStep(0);
     setPhase("running");
-    let elapsed = 0;
-    STEP_DURATIONS_MS.forEach((duration, i) => {
-      elapsed += duration;
-      const id = window.setTimeout(() => {
-        if (i === STEP_DURATIONS_MS.length - 1) {
-          setPhase("done");
-        }
-        setStep(i + 1);
-      }, elapsed);
-      timersRef.current.push(id);
-    });
-    requestAnimationFrame(() => {
-      if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        document
-          .getElementById("pipeline-run")
-          ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      }
-    });
+    setResult(null);
+    setErrorCode(null);
+    retrievalService
+      .search({
+        query: question.trim(),
+        topK: TOP_K,
+        scoreThreshold: 0,
+        documentId: null,
+      })
+      .then((response) => {
+        setResult(response);
+        setPhase("done");
+        setSearchedOnce(true);
+      })
+      .catch((error: unknown) => {
+        setResult(null);
+        setErrorCode(error instanceof ApiError ? error.code : "unknown");
+        setPhase("done");
+      });
   };
 
-  const handleReset = () => {
-    clearTimers();
+  const handleReset = useCallback(() => {
     setPhase("idle");
-    setStep(0);
     setResult(null);
-  };
+    setErrorCode(null);
+  }, []);
 
   const stageState = (index: number): StepState => {
     if (phase === "idle") return "idle";
-    if (phase === "done") return "done";
-    if (index < step) return "done";
-    if (index === step) return "running";
-    return "idle";
+    if (phase === "running") {
+      if (index === 0) return "done";
+      if (index === 1) return "running";
+      return "idle";
+    }
+    if (errorCode) {
+      if (index === 0) return "done";
+      return "idle";
+    }
+    if (result && result.totalResults > 0) {
+      return index <= 3 ? "done" : "idle";
+    }
+    return index <= 2 ? "done" : "idle";
   };
+
+  const hits = result?.results ?? [];
+  const noCorpus = result !== null && result.corpusSize === 0;
+  const noResults =
+    result !== null && result.corpusSize > 0 && result.totalResults === 0;
+  const modelLoadingFirst = phase === "running" && !searchedOnce;
 
   return (
     <div className="space-y-6">
       <PageHeader
         title={t("playground.title")}
         description={t("playground.description")}
-        badge={<StatusBadge label={t("common.demoRun")} tone="accent" />}
+        badge={
+          <StatusBadge
+            label={t("retrieval.liveBadge")}
+            tone="accent"
+            pulse={phase === "running"}
+          />
+        }
         actions={
           phase !== "idle" ? (
             <Button variant="secondary" onClick={handleReset}>
@@ -125,56 +140,122 @@ export default function PlaygroundPage() {
                   total={stages.length}
                 />
               ))}
+              {modelLoadingFirst && (
+                <p className="pt-1 font-mono text-[11px] text-accent">
+                  {t("retrieval.stage.loadingModel")}
+                </p>
+              )}
             </div>
           </Card>
 
-          {phase === "done" && result ? (
-            <div className="space-y-4">
-              <Card title={t("playground.answer.title")}>
-                <div className="px-5 py-5 sm:px-6">
-                  <p className="text-base leading-relaxed text-ink">
-                    {result.answer.text}
+          <div className="space-y-4">
+            {errorCode && (
+              <div
+                role="alert"
+                className="flex items-start gap-2.5 rounded-xl border border-danger/40 bg-danger-soft px-5 py-4"
+              >
+                <AlertTriangle size={15} aria-hidden="true" className="mt-0.5 shrink-0 text-danger" />
+                <div>
+                  <p className="text-sm font-semibold text-ink">
+                    {t("playground.retrievalError")}{" "}
+                    {t(errorKeysFor(errorCode).titleKey)}
                   </p>
-                  <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-line pt-4">
-                    <StatusBadge label={result.answer.model} tone="neutral" />
-                    <span className="font-mono text-[11px] text-faint">
-                      {t("playground.answer.meta", {
-                        latency: result.answer.latencyMs,
-                        chunks: result.sources.length + 1,
-                      })}
-                    </span>
-                  </div>
+                  <p className="mt-0.5 text-sm text-muted">
+                    {t(errorKeysFor(errorCode).bodyKey)}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {noCorpus && (
+              <EmptyState
+                icon={FlaskConical}
+                title={t("playground.noCorpus.title")}
+                description={t("playground.noCorpus.body")}
+                action={
+                  <Link to="/documents" className={buttonStyles("primary")}>
+                    {t("emptyPipeline.upload")}
+                  </Link>
+                }
+              />
+            )}
+
+            {noResults && (
+              <Card title={t("playground.retrievalComplete")}>
+                <div className="px-5 py-5 text-sm text-muted sm:px-6">
+                  {t("retrieval.noResults.title")}{" "}
+                  {t("retrieval.noResults.body")}
                 </div>
               </Card>
+            )}
 
-              <div>
-                <h2 className="text-sm font-semibold tracking-tight text-ink">
-                  {t("playground.sources.title")}
-                </h2>
-                <p className="mt-0.5 text-sm text-muted">
-                  {t("playground.sources.hint")}
-                </p>
-                <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                  {result.sources.map((source, index) => (
-                    <SourceCard
-                      key={source.id}
-                      source={source}
-                      index={index}
-                      onOpen={() => navigate("/retrieval")}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <Card title={t("playground.processing")}>
-              <div className="px-5 py-10 text-center sm:px-6">
-                <p className="animate-pulse font-mono text-xs uppercase tracking-widest text-faint">
-                  {t("playground.processingHint")}
-                </p>
-              </div>
-            </Card>
-          )}
+            {hits.length > 0 && (
+              <>
+                <Card title={t("playground.retrievalComplete")}>
+                  <div className="space-y-3 px-5 py-5 sm:px-6">
+                    <p className="text-sm text-ink">
+                      {t("playground.chunksRetrieved", {
+                        count: hits.length,
+                      })}{" "}
+                      · {t("playground.topResult")}:{" "}
+                      <span className="font-mono font-semibold text-accent">
+                        {hits[0].score.toFixed(4)}
+                      </span>
+                    </p>
+                    <p className="font-mono text-[11px] text-faint">
+                      {result?.queryEmbedding.model} ·{" "}
+                      {t("embeddings.dimensionsValue", {
+                        count: String(result?.queryEmbedding.dimensions ?? 0),
+                      })}{" "}
+                      · Qdrant
+                    </p>
+                  </div>
+                </Card>
+
+                <Card title={t("playground.contextTitle")}>
+                  <ul className="divide-y divide-line">
+                    {hits.slice(0, 3).map((hit: RetrievalHit) => (
+                      <li key={hit.pointId} className="px-5 py-4 sm:px-6">
+                        <div className="flex flex-wrap items-baseline justify-between gap-2">
+                          <p className="text-sm font-medium text-ink">
+                            {hit.documentName}
+                          </p>
+                          <p className="font-mono text-[11px] text-accent">
+                            {t("retrieval.cosineSimilarity")}{" "}
+                            {hit.score.toFixed(4)} · #
+                            {hit.rank}
+                          </p>
+                        </div>
+                        <p className="mt-1.5 text-sm leading-relaxed text-muted">
+                          {hit.text.length > 260
+                            ? `${hit.text.slice(0, 260)}…`
+                            : hit.text}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+
+                <Card title={t("playground.llmPendingTitle")}>
+                  <div className="space-y-3 px-5 py-5 sm:px-6">
+                    <p className="text-sm leading-relaxed text-muted">
+                      {t("playground.llmPendingBody")}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <StatusBadge label="LLM · Phase 5" tone="neutral" />
+                      <StatusBadge label={t("playground.answerPhase5")} tone="neutral" />
+                      <Link
+                        to="/retrieval"
+                        className="ml-auto text-sm font-medium text-accent underline-offset-4 hover:underline"
+                      >
+                        {t("retrieval.title")} →
+                      </Link>
+                    </div>
+                  </div>
+                </Card>
+              </>
+            )}
+          </div>
         </div>
       )}
     </div>

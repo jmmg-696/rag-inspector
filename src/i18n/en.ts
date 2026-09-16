@@ -116,26 +116,12 @@ export const en = {
   "playground.run.title": "Pipeline run",
   "playground.processing": "Processing",
   "playground.processingHint": "Retrieving context and generating…",
-  "playground.answer.title": "Answer",
-  "playground.answer.meta":
-    "{latency} ms · {chunks} chunks of context · mocked in this prototype",
-  "playground.sources.title": "Sources",
-  "playground.sources.hint":
-    "The chunks the answer was grounded in. Click one to inspect retrieval.",
   "playground.questionEcho": "Q: {question}",
 
   "retrieval.title": "Retrieval Inspector",
   "retrieval.description":
     "See which chunks your RAG system actually retrieves.",
-  "retrieval.badge": "Mocked retrieval",
-  "retrieval.query": "Query",
   "retrieval.chunksTitle": "Retrieved Chunks",
-  "retrieval.chunksDescription":
-    "{count} of {total} indexed chunks, ranked by semantic similarity.",
-  "retrieval.tryAnother": "Try another query",
-  "retrieval.empty.title": "No chunks crossed the similarity threshold",
-  "retrieval.empty.body":
-    "Nothing in the index was close enough to this query. Try asking something else in the Playground.",
   "retrieval.similarity": "Similarity",
   "retrieval.rank": "Rank {rank}",
 
@@ -462,7 +448,73 @@ export const en = {
     "This document is already being processed.",
   "error.collection_mismatch.title": "Dimension mismatch",
   "error.collection_mismatch.body":
-    "The Qdrant collection was created with a different embedding model. Delete the collection or switch back to index again."
+    "The Qdrant collection was created with a different embedding model. Delete the collection or switch back to index again.",
+  "error.validation.title": "Invalid query",
+  "error.validation.body":
+    "Check the query text, Top K (1–20) and threshold (0–1) values.",
+
+  "retrieval.liveBadge": "Live retrieval",
+  "retrieval.search": "Search",
+  "retrieval.searching": "Searching…",
+  "retrieval.placeholder": "Ask something about your documents…",
+  "retrieval.queryLabel": "Question",
+  "retrieval.topK": "Top K",
+  "retrieval.threshold": "Similarity threshold",
+  "retrieval.thresholdHint":
+    "Threshold filters retrieved results below this similarity score.",
+  "retrieval.document": "Document",
+  "retrieval.allDocuments": "All documents",
+  "retrieval.resultsTitle": "Retrieved Chunks",
+  "retrieval.resultsCount": "{shown} of {total} indexed chunks matched",
+  "retrieval.corpusSize": "{count} indexed chunks",
+  "retrieval.cosineSimilarity": "Cosine similarity",
+  "retrieval.scoreIsNotConfidence":
+    "This is a retrieval similarity score — not a confidence score, correctness or probability.",
+  "retrieval.similarityWhatTitle": "What does similarity mean?",
+  "retrieval.similarityWhatBody":
+    "Cosine similarity measures how closely two vectors point in the same direction in embedding space. A higher similarity means the retrieved chunk is more semantically related to the query according to the embedding model — but similarity does not guarantee that the chunk contains the correct answer.",
+  "retrieval.whyRetrieved": "Why was this retrieved?",
+  "retrieval.whyRetrievedBody":
+    "This chunk was retrieved because its embedding has high cosine similarity to the query embedding. The score ({score}) reflects semantic proximity in the embedding space. It does not guarantee that this chunk contains the correct answer.",
+  "retrieval.viewChunk": "View chunk",
+  "retrieval.tokens": "{count} tokens",
+  "retrieval.queryEmbeddingTitle": "Query embedding",
+  "retrieval.model": "Model",
+  "retrieval.recentQueries": "Recent queries",
+  "retrieval.noIndexedDocuments.title": "No indexed documents yet",
+  "retrieval.noIndexedDocuments.body":
+    "Upload a document to build your vector store.",
+  "retrieval.noResults.title": "No chunks matched this query.",
+  "retrieval.noResults.body":
+    "Try: a different question · a lower similarity threshold · searching all documents.",
+  "retrieval.flow.query": "Question",
+  "retrieval.flow.embedding": "Query embedding",
+  "retrieval.flow.search": "Qdrant search",
+  "retrieval.flow.similarity": "Cosine similarity",
+  "retrieval.flow.ranking": "Ranking · Top-K",
+  "retrieval.flowTitle": "How retrieval works",
+  "retrieval.spaceTitle": "Where this query lands",
+  "retrieval.spaceBody":
+    "The star is your query embedding. Highlighted points are the retrieved chunks — scores come from Qdrant, not from 2D distances.",
+  "retrieval.legendQuery": "Query",
+  "retrieval.legendRetrieved": "Retrieved (Top-K)",
+  "retrieval.legendOther": "Other chunks",
+  "retrieval.stage.loadingModel": "Loading embedding model for the first query…",
+  "retrieval.stage.embedding": "Embedding query with BGE-M3…",
+  "retrieval.stage.searching": "Searching Qdrant…",
+
+  "playground.retrievalComplete": "Retrieval complete",
+  "playground.chunksRetrieved": "{count} chunks retrieved",
+  "playground.topResult": "Top result",
+  "playground.contextTitle": "Retrieved context",
+  "playground.llmPendingTitle": "LLM generation — Phase 5",
+  "playground.llmPendingBody":
+    "Answer generation is intentionally not implemented yet. The pipeline stops here, at the real retrieved context.",
+  "playground.answerPhase5": "Answer — Phase 5",
+  "playground.noCorpus.title": "No indexed documents",
+  "playground.noCorpus.body":
+    "Upload a document first so retrieval has something to search.",
+  "playground.retrievalError": "The retrieval run failed:"
 } as const;
 
 export type TranslationKey = keyof typeof en;

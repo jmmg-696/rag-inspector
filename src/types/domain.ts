@@ -160,6 +160,50 @@ export interface SemanticSpace {
   points: SpacePoint[];
 }
 
+export interface RetrievalHit {
+  rank: number;
+  score: number;
+  pointId: string;
+  chunkId: string;
+  documentId: string;
+  documentName: string;
+  chunkIndex: number;
+  pageStart: number;
+  pageEnd: number;
+  estimatedTokens: number;
+  text: string;
+}
+
+export interface QueryEmbeddingInfo {
+  model: string;
+  dimensions: number;
+  vector: number[] | null;
+}
+
+export interface RetrievalSearchResponse {
+  query: string;
+  queryEmbedding: QueryEmbeddingInfo;
+  results: RetrievalHit[];
+  totalResults: number;
+  corpusSize: number;
+  topK: number;
+  scoreThreshold: number;
+  filteredDocumentId: string | null;
+}
+
+export interface RetrievalSpacePoint extends SpacePoint {
+  retrieved: boolean;
+  score: number | null;
+}
+
+export interface RetrievalSpace {
+  method: string;
+  dimensions: number;
+  model: string;
+  points: RetrievalSpacePoint[];
+  query: { x: number; y: number } | null;
+}
+
 export type StageIconKey =
   | "documents"
   | "chunking"
@@ -196,34 +240,6 @@ export interface OverviewMetric {
   label: string;
   value: string;
   hint: string;
-}
-
-export interface RetrievedChunk {
-  id: string;
-  rank: number;
-  document: string;
-  page: number;
-  similarity: number;
-  text: string;
-}
-
-export interface RagAnswer {
-  text: string;
-  model: string;
-  latencyMs: number;
-}
-
-export interface SourceReference {
-  id: string;
-  document: string;
-  page: number;
-  similarity: number;
-  snippet: string;
-}
-
-export interface RagRunResult {
-  answer: RagAnswer;
-  sources: SourceReference[];
 }
 
 export interface EvalMetric {

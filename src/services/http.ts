@@ -35,6 +35,8 @@ export async function request<T>(
         }
       } else if (response.status === 404) {
         code = "not_found";
+      } else if (response.status === 422) {
+        code = "validation";
       }
     } catch {
       /* body unreadable */

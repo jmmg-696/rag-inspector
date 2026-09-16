@@ -118,26 +118,12 @@ export const es: TranslationDictionary = {
   "playground.run.title": "Ejecución del pipeline",
   "playground.processing": "Procesando",
   "playground.processingHint": "Recuperando contexto y generando…",
-  "playground.answer.title": "Respuesta",
-  "playground.answer.meta":
-    "{latency} ms · {chunks} chunks de contexto · simulado en este prototipo",
-  "playground.sources.title": "Fuentes",
-  "playground.sources.hint":
-    "Los chunks sobre los que se apoyó la respuesta. Hacé clic para inspeccionar la recuperación.",
   "playground.questionEcho": "P: {question}",
 
   "retrieval.title": "Retrieval Inspector",
   "retrieval.description":
     "Vé exactamente qué chunks recupera tu sistema RAG.",
-  "retrieval.badge": "Recuperación simulada",
-  "retrieval.query": "Consulta",
   "retrieval.chunksTitle": "Chunks recuperados",
-  "retrieval.chunksDescription":
-    "{count} de {total} chunks indexados, ordenados por similitud semántica.",
-  "retrieval.tryAnother": "Probar otra consulta",
-  "retrieval.empty.title": "Ningún chunk superó el umbral de similitud",
-  "retrieval.empty.body":
-    "Nada del índice estuvo lo suficientemente cerca de esta consulta. Probá otra pregunta en el Playground.",
   "retrieval.similarity": "Similitud",
   "retrieval.rank": "Puesto {rank}",
 
@@ -464,5 +450,71 @@ export const es: TranslationDictionary = {
     "Este documento ya está siendo procesado.",
   "error.collection_mismatch.title": "Dimensiones que no coinciden",
   "error.collection_mismatch.body":
-    "La colección de Qdrant se creó con un modelo de embeddings distinto. Borrá la colección o volvé al modelo anterior para indexar de nuevo."
+    "La colección de Qdrant se creó con un modelo de embeddings distinto. Borrá la colección o volvé al modelo anterior para indexar de nuevo.",
+  "error.validation.title": "Consulta inválida",
+  "error.validation.body":
+    "Revisá el texto de la consulta, el Top K (1–20) y el umbral (0–1).",
+
+  "retrieval.liveBadge": "Búsqueda real",
+  "retrieval.search": "Buscar",
+  "retrieval.searching": "Buscando…",
+  "retrieval.placeholder": "Preguntá algo sobre tus documentos…",
+  "retrieval.queryLabel": "Pregunta",
+  "retrieval.topK": "Top K",
+  "retrieval.threshold": "Umbral de similitud",
+  "retrieval.thresholdHint":
+    "El umbral filtra los resultados por debajo de este score de similitud.",
+  "retrieval.document": "Documento",
+  "retrieval.allDocuments": "Todos los documentos",
+  "retrieval.resultsTitle": "Chunks recuperados",
+  "retrieval.resultsCount": "{shown} de {total} chunks indexados coincidieron",
+  "retrieval.corpusSize": "{count} chunks indexados",
+  "retrieval.cosineSimilarity": "Similitud coseno",
+  "retrieval.scoreIsNotConfidence":
+    "Esto es un score de similitud de recuperación — no un score de confianza, de corrección ni una probabilidad.",
+  "retrieval.similarityWhatTitle": "¿Qué significa la similitud?",
+  "retrieval.similarityWhatBody":
+    "La similitud coseno mide cuán parecida es la dirección de dos vectores en el espacio de embeddings. Una similitud más alta indica que el chunk recuperado está más relacionado semánticamente con la consulta según el modelo de embeddings — pero la similitud no garantiza que el chunk contenga la respuesta correcta.",
+  "retrieval.whyRetrieved": "¿Por qué se recuperó esto?",
+  "retrieval.whyRetrievedBody":
+    "Este chunk se recuperó porque su embedding tiene una alta similitud coseno con el embedding de la consulta. El score ({score}) refleja cercanía semántica en el espacio de embeddings. No garantiza que este chunk contenga la respuesta correcta.",
+  "retrieval.viewChunk": "Ver chunk",
+  "retrieval.tokens": "{count} tokens",
+  "retrieval.queryEmbeddingTitle": "Embedding de la consulta",
+  "retrieval.model": "Modelo",
+  "retrieval.recentQueries": "Consultas recientes",
+  "retrieval.noIndexedDocuments.title": "Todavía no hay documentos indexados",
+  "retrieval.noIndexedDocuments.body":
+    "Subí un documento para construir tu vector store.",
+  "retrieval.noResults.title": "Ningún chunk coincidió con esta consulta.",
+  "retrieval.noResults.body":
+    "Probá: otra pregunta · un umbral de similitud más bajo · buscar en todos los documentos.",
+  "retrieval.flow.query": "Pregunta",
+  "retrieval.flow.embedding": "Embedding de consulta",
+  "retrieval.flow.search": "Búsqueda en Qdrant",
+  "retrieval.flow.similarity": "Similitud coseno",
+  "retrieval.flow.ranking": "Ranking · Top-K",
+  "retrieval.flowTitle": "Cómo funciona la recuperación",
+  "retrieval.spaceTitle": "Dónde cae esta consulta",
+  "retrieval.spaceBody":
+    "La estrella es el embedding de tu consulta. Los puntos destacados son los chunks recuperados — los scores vienen de Qdrant, no de las distancias 2D.",
+  "retrieval.legendQuery": "Consulta",
+  "retrieval.legendRetrieved": "Recuperados (Top-K)",
+  "retrieval.legendOther": "Otros chunks",
+  "retrieval.stage.loadingModel": "Cargando el modelo de embeddings por primera vez…",
+  "retrieval.stage.embedding": "Generando embedding con BGE-M3…",
+  "retrieval.stage.searching": "Buscando en Qdrant…",
+
+  "playground.retrievalComplete": "Recuperación completa",
+  "playground.chunksRetrieved": "{count} chunks recuperados",
+  "playground.topResult": "Mejor resultado",
+  "playground.contextTitle": "Contexto recuperado",
+  "playground.llmPendingTitle": "Generación LLM — Fase 5",
+  "playground.llmPendingBody":
+    "La generación de respuestas todavía no está implementada, a propósito. El pipeline se detiene acá, en el contexto recuperado real.",
+  "playground.answerPhase5": "Respuesta — Fase 5",
+  "playground.noCorpus.title": "No hay documentos indexados",
+  "playground.noCorpus.body":
+    "Primero subí un documento para que la búsqueda tenga qué buscar.",
+  "playground.retrievalError": "La búsqueda falló:"
 };

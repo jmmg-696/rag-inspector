@@ -1,6 +1,6 @@
 import { AlertTriangle, ArrowLeft } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { ChunkBrowser } from "../components/chunking/ChunkBrowser";
 import { ChunkSettingsPanel } from "../components/chunking/ChunkSettingsPanel";
 import { ChunkStrip } from "../components/chunking/ChunkStrip";
@@ -49,6 +49,7 @@ function BackLink() {
 
 export default function DocumentDetailPage() {
   const { documentId } = useParams<{ documentId: string }>();
+  const location = useLocation();
   const { t } = useI18n();
   const [detail, setDetail] = useState<DocumentDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(true);
@@ -64,6 +65,10 @@ export default function DocumentDetailPage() {
 
   const loadDetail = useCallback(() => {
     if (!documentId) return;
+    const navState = (location.state ?? null) as {
+      tab?: Tab;
+      chunkIndex?: number;
+    } | null;
     documentService
       .get(documentId)
       .then((result) => {
@@ -71,13 +76,23 @@ export default function DocumentDetailPage() {
         setChunkSize(result.chunkSize);
         setChunkOverlap(result.chunkOverlap);
         setSelectedChunk(0);
+        if (navState?.tab && TABS.some((item) => item.id === navState.tab)) {
+          setTab(navState.tab);
+        }
+        if (
+          navState?.chunkIndex !== undefined &&
+          Number.isInteger(navState.chunkIndex) &&
+          navState.chunkIndex >= 0
+        ) {
+          setSelectedChunk(navState.chunkIndex);
+        }
       })
       .catch(
         (error: unknown) =>
           setDetailErrorCode(error instanceof ApiError ? error.code : "unknown")
       )
       .finally(() => setDetailLoading(false));
-  }, [documentId]);
+  }, [documentId, location.state]);
 
   const retryDetail = () => {
     setDetailLoading(true);
