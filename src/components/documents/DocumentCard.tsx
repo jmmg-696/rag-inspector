@@ -1,4 +1,5 @@
 import { FileText } from "lucide-react";
+import { useI18n } from "../../hooks/useI18n";
 import type { KnowledgeDocument } from "../../types/domain";
 import { documentStatusMeta } from "../../lib/documentStatus";
 import { formatChunkCount } from "../../lib/format";
@@ -11,6 +12,7 @@ export function DocumentCard({
   document: KnowledgeDocument;
   onSelect: (document: KnowledgeDocument) => void;
 }) {
+  const { t } = useI18n();
   const status = documentStatusMeta[document.status];
   return (
     <button
@@ -27,15 +29,19 @@ export function DocumentCard({
             {document.name}
           </span>
           <span className="mt-0.5 block font-mono text-[11px] text-faint">
-            {document.type} · {document.pages} pages ·{" "}
+            {document.type} · {document.pages} {t("detail.page.plural")} ·{" "}
             {document.chunks > 0 ? formatChunkCount(document.chunks) : "0"}{" "}
-            chunks
+            {t("detail.chunk.plural")}
           </span>
         </span>
-        <StatusBadge label={status.label} tone={status.tone} pulse={status.pulse} />
+        <StatusBadge
+          label={t(status.labelKey)}
+          tone={status.tone}
+          pulse={status.pulse}
+        />
       </span>
       <span className="mt-3 block border-t border-line pt-2.5 font-mono text-[11px] text-faint">
-        Added {document.addedAgo}
+        {t("common.table.added")} {document.addedAgo}
       </span>
     </button>
   );

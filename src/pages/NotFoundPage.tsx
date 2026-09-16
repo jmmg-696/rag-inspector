@@ -1,19 +1,25 @@
 import { Link } from "react-router-dom";
 import { Compass } from "lucide-react";
 import { EmptyState } from "../components/ui/EmptyState";
+import { buttonStyles } from "../lib/buttonStyles";
+import { useI18n } from "../hooks/useI18n";
 
 export default function NotFoundPage() {
+  const { t } = useI18n();
   return (
     <EmptyState
       icon={Compass}
-      title="404 — This page is not in the knowledge base"
-      description="The route you requested could not be retrieved from this application."
+      title={t("notFound.title")}
+      description={t("notFound.body")}
       action={
         <Link
           to="/"
-          className="inline-flex h-9 items-center gap-2 rounded-md bg-accent px-4 text-sm font-medium text-white transition-colors hover:bg-accent-strong dark:text-[#0b0d10]"
+          className={buttonStyles(
+            "primary",
+            "!bg-accent hover:!bg-accent-strong"
+          )}
         >
-          Back to Overview
+          {t("notFound.back")}
         </Link>
       }
     />

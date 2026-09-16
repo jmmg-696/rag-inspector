@@ -1,11 +1,12 @@
 import type { StatusBadgeTone } from "../components/ui/StatusBadge";
+import type { TranslationKey } from "../i18n";
 import type { EvalStatus } from "../types/domain";
 
 export const evalStatusMeta: Record<
   EvalStatus,
-  { label: string; tone: StatusBadgeTone }
+  { labelKey: TranslationKey; tone: StatusBadgeTone }
 > = {
-  pass: { label: "Pass", tone: "success" },
-  warn: { label: "Review", tone: "warning" },
-  fail: { label: "Fail", tone: "danger" },
+  pass: { labelKey: "evaluation.status.pass", tone: "success" },
+  warn: { labelKey: "evaluation.status.warn", tone: "warning" },
+  fail: { labelKey: "evaluation.status.fail", tone: "danger" },
 };

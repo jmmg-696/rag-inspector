@@ -10,44 +10,60 @@ A visual playground for understanding how **Retrieval-Augmented Generation** wor
 
 ## Overview
 
-Most RAG demos show you two boxes: a question going in and an answer coming out.
-The interesting part — the actual *retrieval* — is hidden.
+Most RAG demos show you two boxes: a question going in and an answer coming
+out. The interesting part — the actual *retrieval* — is hidden.
 
-**RAG Inspector** makes the whole pipeline visible:
+**RAG Inspector** makes the whole pipeline visible. Every operation shows two
+layers: **what happened** (the real numbers) and **why it matters** (the human
+explanation).
+
+As of **Phase 2**, the front of the pipeline is real: upload a local PDF,
+DOCX, TXT or Markdown document and watch it become cleaned, page-mapped,
+deterministic chunks — with a visual chunking explorer you can retune live.
 
 ```text
-Question
-   ↓
-Query Embedding
-   ↓
-Semantic Retrieval
-   ↓
-Relevant Chunks
-   ↓
-Context
-   ↓
-Local LLM
-   ↓
-Generated Answer
-   ↓
-Sources
+Documents  →  Chunking  →  Embeddings  →  Vector Store  →  Retrieval  →  Context  →  Local LLM  →  Answer
+  ● real       ● real        ○ next phase     ○ planned        ○ mock        ○ mock       ○ mock       ○ mock
 ```
 
-The long-term goal is a fully local RAG workbench (Ollama + Qdrant + local
-embeddings). This repository currently ships **Phase 1: the complete frontend
-prototype, running on realistic mock data** — no backend, no LLM, no vector
-database yet. The UI is the product's contract with the user, so it comes first.
+Everything runs locally. No embeddings, no Qdrant, no Ollama and no answer
+generation yet — those are deliberately reserved for later phases.
+
+## Current Pipeline (Phase 2)
+
+```text
+DOCUMENT
+    ↓
+TEXT EXTRACTION
+    ↓
+CLEANING
+    ↓
+CHUNKING
+    ↓
+CHUNKS
+```
+
+Phase 2 focuses on making document ingestion and chunking visible and
+understandable. Embeddings and retrieval will be introduced in the next
+phases.
 
 ## Features
 
-- **Overview** — pipeline visualization with per-stage explanations, corpus metrics and recent query history
-- **Documents** — indexed document management with details view (ingestion is mocked, by design)
-- **Playground** — ask a question and watch it travel through embedding → retrieval → context → LLM → answer, with clickable sources
-- **Retrieval Inspector** — the chunks your query actually retrieves, ranked with similarity scores
-- **Evaluation** — quality metrics dashboard (clearly labeled as demo data, never presented as real measurement)
-- **Learn** — a visual, step-by-step explanation of how RAG works
-- Light and dark themes (persisted locally)
-- Fully responsive, keyboard-accessible, local-first — no external requests at runtime
+- **Documents** — real local ingestion: upload PDF/DOCX/TXT/MD, see per-page
+  extracted text, cleaning statistics and every generated chunk
+- **Visual Chunking Explorer** — watch a document split into overlapping
+  chunks; change chunk size and overlap and the visualization reacts
+- **Ingestion pipeline** — Upload → Extract → Clean → Chunk → Ready, with a
+  plain-language explanation under each step
+- **Overview** — the RAG pipeline with available / current-phase / planned
+  stage states, corpus metrics and query history
+- **Playground** — simulated question → answer run with clickable sources
+- **Retrieval Inspector** — ranked chunks with similarity bars (mocked)
+- **Evaluation** — quality dashboard, clearly labeled as demo data
+- **Learn** — visual step-by-step explanation of how RAG works
+- **English / Spanish** — full UI translation, persisted, no reload
+- Light and dark themes, responsive layout, keyboard accessibility,
+  reduced-motion support — all local, zero external requests
 
 ## Screenshots
 
@@ -56,52 +72,40 @@ database yet. The UI is the product's contract with the user, so it comes first.
 | | |
 |---|---|
 | `public/screenshots/overview.png` | Overview with the RAG pipeline |
+| `public/screenshots/documents.png` | Ingested documents |
+| `public/screenshots/chunking.png` | Visual chunking explorer |
 | `public/screenshots/playground.png` | A question travelling through the pipeline |
-| `public/screenshots/retrieval.png` | Ranked chunks and similarity scores |
 
 ## Architecture
 
-Frontend-only, organized so that the mock layer can be swapped for a real
-backend without touching the UI:
-
 ```text
-src/
-  types/          domain types shared across the app
-  data/           ALL mock data lives here (mockDocuments, mockQueries,
-                  mockRetrieval, mockEvaluation, mockPipeline, mockLearn,
-                  mockPlaygroundRun) — one module per domain
-  lib/            tiny pure helpers (formatting, status maps)
-  hooks/          useTheme, useLocalStorage
-  theme/          theme context + provider
-  components/
-    layout/       Sidebar, TopBar, MobileNav, AppLayout, routing chrome
-    ui/           PageHeader, StatusBadge, MetricCard, Modal, EmptyState,
-                  SimilarityBar, Card, Button
-    pipeline/     Pipeline, PipelineStep — the hero component
-    documents/    DocumentTable, DocumentCard, DocumentDetails
-    query/        QueryInput, RecentQueriesTable
-    retrieval/    ChunkCard, RetrievalResult
-    sources/      SourceCard
-    evaluation/   EvalMetricCard, EvalResultsTable
-    learn/        LearnVisualBlock
-  pages/          one file per route
+├── src/                     frontend (React + TS + Vite + Tailwind v4)
+│   ├── types/               domain types
+│   ├── i18n/                en.ts / es.ts / provider (typed keys, no scattered strings)
+│   ├── services/            documentService — the seam for the backend
+│   ├── data/                remaining mock data (queries, retrieval, evaluation…)
+│   ├── lib/                 tiny pure helpers
+│   ├── hooks/  theme/
+│   ├── components/          layout · ui · pipeline · documents · chunking ·
+│   │                        query · retrieval · sources · evaluation · learn
+│   └── pages/               one file per route
+└── backend/                 FastAPI (see backend/README.md)
+    └── app/                 api · services (extraction, cleaning, chunking,
+                             document) · models · schemas
 ```
 
-Later phases replace data imports with services:
+The frontend talks to the backend **only** through `src/services/documentService.ts`
+(Vite proxies `/api` → `http://localhost:8000`). The remaining mock modules
+(`mockQueries`, `mockRetrieval`, `mockEvaluation`) will be replaced by the
+same service pattern when retrieval and generation land.
 
-```text
-import { mockDocuments }   from "../data/mockDocuments"     // today
-import { documentService } from "../services/documents"    // later
+Tokens are approximated at ~4 characters per token until a real tokenizer
+arrives with the embeddings phase — the UI says so explicitly wherever it
+matters.
 
-import { getRagRun }  from "../data/mockPlaygroundRun"     // today
-import { retrievalService } from "../services/retrieval"   // later
-```
+### Planned (not implemented yet)
 
-No API client, no premature abstraction — just a clean seam.
-
-### Planned backend (not implemented yet)
-
-`FastAPI + Ollama + Qdrant + local embedding models`
+`Ollama` for local generation · `Qdrant` for vectors · `BGE-M3` embeddings.
 
 ## Roadmap
 
@@ -110,37 +114,59 @@ No API client, no premature abstraction — just a clean seam.
 - [x] Document interface
 - [x] Playground mock
 - [x] Retrieval visualization
+- [x] Local document ingestion
+- [x] Text extraction
+- [x] Document cleaning
+- [x] Chunking engine
+- [x] Visual chunking explorer
+- [x] English / Spanish
 
-- [ ] Real document ingestion
-- [ ] Chunking engine
-- [ ] Local embeddings
+- [ ] Embeddings
 - [ ] Qdrant integration
+- [ ] Semantic retrieval
 - [ ] Ollama integration
-- [ ] Real retrieval
+- [ ] Real RAG generation
 - [ ] Source citations
 - [ ] RAG vs No-RAG
-- [ ] Chunking playground
+- [ ] Chunking experiments
 - [ ] Evaluation
 
 ## Local Development
 
-Requires Node.js 20+.
+Requires Node.js 20+ and Python 3.11+.
+
+**Frontend**
 
 ```bash
 npm install
-npm run dev      # start the dev server
-npm run build    # type-check + production build
-npm run lint     # ESLint
-npm run preview  # serve the production build
+npm run dev        # http://localhost:5173
+npm run build      # type-check + production build
+npm run lint
 ```
+
+**Backend** (needed for the Documents page; everything else runs on mock data)
+
+```bash
+cd backend
+python -m venv .venv && .venv/Scripts/activate   # Windows
+# source .venv/bin/activate                      # macOS / Linux
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+```
+
+Try it immediately with the fictional sample: `examples/sample-handbook.txt`.
+
+With the backend offline, Documents shows demo data and says so — no silent
+degradation.
 
 ## Tech Stack
 
 - React 19 + TypeScript (strict)
 - Vite
 - Tailwind CSS v4 (CSS-first theme, class-based dark mode)
-- React Router v7
-- Lucide icons
+- React Router v7 · Lucide icons
+- FastAPI + PyMuPDF + python-docx (backend)
+- pytest for the ingestion pipeline
 
 No UI kit, no animation library, no state manager. Intentionally.
 

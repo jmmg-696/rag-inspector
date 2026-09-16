@@ -11,6 +11,60 @@ export interface KnowledgeDocument {
   addedAgo: string;
 }
 
+export interface CleaningStats {
+  originalCharacters: number;
+  cleanedCharacters: number;
+  removedArtifacts: number;
+}
+
+export interface DocumentSummary {
+  id: string;
+  name: string;
+  type: string;
+  pageCount: number;
+  characters: number;
+  words: number;
+  status: string;
+  chunkSize: number;
+  chunkOverlap: number;
+  chunkCount: number;
+  cleaning: CleaningStats;
+  createdAt: string;
+}
+
+export interface DocumentPageText {
+  page: number;
+  text: string;
+  characters: number;
+}
+
+export interface DocumentDetail extends DocumentSummary {
+  pages: DocumentPageText[];
+}
+
+export interface ChunkRecord {
+  id: string;
+  documentId: string;
+  index: number;
+  text: string;
+  pageStart: number;
+  pageEnd: number;
+  characterCount: number;
+  estimatedTokens: number;
+}
+
+export interface ChunksResponse {
+  documentId: string;
+  chunkSize: number;
+  chunkOverlap: number;
+  charactersPerToken: number;
+  total: number;
+  chunks: ChunkRecord[];
+}
+
+export const CHUNK_SIZES = [128, 256, 512, 1024] as const;
+export const CHUNK_OVERLAPS = [0, 50, 100, 200] as const;
+
 export type StageIconKey =
   | "documents"
   | "chunking"
@@ -19,7 +73,10 @@ export type StageIconKey =
   | "retrieval"
   | "context"
   | "llm"
-  | "answer";
+  | "answer"
+  | "question";
+
+export type StageStatus = "done" | "current" | "upcoming";
 
 export interface PipelineStage {
   id: string;
@@ -27,6 +84,7 @@ export interface PipelineStage {
   icon: StageIconKey;
   description: string;
   detail: string;
+  status?: StageStatus;
 }
 
 export interface RecentQuery {
@@ -105,4 +163,4 @@ export type LearnVisual =
   | { kind: "embeddings"; samples: { text: string; vector: number[] }[] }
   | { kind: "vector-search"; query: string; points: { label: string; distance: number }[] }
   | { kind: "context"; window: number; chunks: string[] }
-  | { kind: "generation"; prompt: string; answer: string };
+  | { kind: "generation"; answer: string };

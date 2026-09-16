@@ -71,6 +71,16 @@
 @theme {
   --animate-fade-up: fade-up 0.18s ease-out both;
   --animate-fade-in: fade-in 0.15s ease-out both;
+  --animate-indeterminate: indeterminate 1.15s ease-in-out infinite;
+
+  @keyframes indeterminate {
+    0% {
+      transform: translateX(-110%);
+    }
+    100% {
+      transform: translateX(320%);
+    }
+  }
 
   @keyframes fade-up {
     from {

@@ -3,25 +3,27 @@ import { ArrowRight } from "lucide-react";
 import { LearnVisualBlock } from "../components/learn/LearnVisualBlock";
 import { PageHeader } from "../components/ui/PageHeader";
 import { StatusBadge } from "../components/ui/StatusBadge";
+import { useI18n } from "../hooks/useI18n";
 import { buttonStyles } from "../lib/buttonStyles";
 import { mockLearnSections } from "../data/mockLearn";
+import type { TranslationKey } from "../i18n";
 
 export default function LearnPage() {
+  const { t } = useI18n();
   return (
     <div className="space-y-6">
       <PageHeader
-        title="How RAG works"
-        description="Retrieval-Augmented Generation, step by step — no hand-waving, no magic."
-        badge={<StatusBadge label="Learning mode" tone="accent" />}
+        title={t("nav.howRagWorks")}
+        description={t("learn.description")}
+        badge={<StatusBadge label={t("learn.badge")} tone="accent" />}
       />
 
       <div className="rounded-xl border border-line bg-surface px-6 py-9 text-center shadow-sm sm:py-12">
         <p className="text-xl font-semibold tracking-tight text-ink sm:text-2xl">
-          RAG shouldn&rsquo;t be a black box.
+          {t("learn.hero.statement")}
         </p>
         <p className="mx-auto mt-2.5 max-w-xl text-sm leading-relaxed text-muted">
-          It is a pipeline. Every step is visible, inspectable and testable.
-          Here is what happens between your question and the answer.
+          {t("learn.hero.body")}
         </p>
       </div>
 
@@ -38,10 +40,10 @@ export default function LearnPage() {
                   {section.step}
                 </p>
                 <h2 className="mt-1.5 text-lg font-semibold tracking-tight text-ink">
-                  {section.title}
+                  {t(`learn.${section.id}.title` as TranslationKey)}
                 </h2>
                 <p className="mt-2 text-sm leading-relaxed text-muted">
-                  {section.text}
+                  {t(`learn.${section.id}.text` as TranslationKey)}
                 </p>
               </div>
               <div className="rounded-lg border border-line bg-canvas p-4 sm:p-5">
@@ -54,15 +56,11 @@ export default function LearnPage() {
 
       <div className="flex flex-col items-center gap-3 rounded-xl border border-line bg-surface px-6 py-8 text-center shadow-sm sm:flex-row sm:justify-between sm:text-left">
         <div>
-          <p className="text-sm font-semibold text-ink">
-            Ready to see it on your own questions?
-          </p>
-          <p className="mt-0.5 text-sm text-muted">
-            The Playground runs the same pipeline with visible sources.
-          </p>
+          <p className="text-sm font-semibold text-ink">{t("learn.cta.title")}</p>
+          <p className="mt-0.5 text-sm text-muted">{t("learn.cta.body")}</p>
         </div>
         <Link to="/playground" className={buttonStyles("primary")}>
-          Open Playground
+          {t("learn.cta.action")}
           <ArrowRight size={14} aria-hidden="true" />
         </Link>
       </div>

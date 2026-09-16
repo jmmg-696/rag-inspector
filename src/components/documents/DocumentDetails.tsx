@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, FileText } from "lucide-react";
 import type { KnowledgeDocument } from "../../types/domain";
+import { useI18n } from "../../hooks/useI18n";
 import { documentStatusMeta } from "../../lib/documentStatus";
 import { formatChunkCount } from "../../lib/format";
 import { StatusBadge } from "../ui/StatusBadge";
@@ -22,6 +23,7 @@ export function DocumentDetails({
 }: {
   document: KnowledgeDocument;
 }) {
+  const { t } = useI18n();
   const status = documentStatusMeta[document.status];
   return (
     <div className="space-y-5">
@@ -34,11 +36,12 @@ export function DocumentDetails({
             {document.name}
           </p>
           <p className="font-mono text-[11px] text-faint">
-            {document.type} · added {document.addedAgo}
+            {t("detail.meta", { type: document.type, count: document.pages })}{" "}
+            · {t("common.table.added").toLowerCase()} {document.addedAgo}
           </p>
         </div>
         <StatusBadge
-          label={status.label}
+          label={t(status.labelKey)}
           tone={status.tone}
           pulse={status.pulse}
           className="ml-auto"
@@ -46,22 +49,27 @@ export function DocumentDetails({
       </div>
 
       <dl className="grid grid-cols-2 gap-3">
-        <MetaItem label="Pages" value={String(document.pages)} />
         <MetaItem
-          label="Chunks"
+          label={t("common.pages")}
+          value={String(document.pages)}
+        />
+        <MetaItem
+          label={t("common.chunks")}
           value={
             document.chunks > 0
               ? formatChunkCount(document.chunks)
-              : "Not chunked yet"
+              : t("documents.notIndexed")
           }
         />
-        <MetaItem label="Embedding" value={document.embedding} />
-        <MetaItem label="Status" value={status.label} />
+        <MetaItem label={t("nav.embeddings")} value={document.embedding} />
+        <MetaItem
+          label={t("evaluation.table.status")}
+          value={t(status.labelKey)}
+        />
       </dl>
 
       <p className="text-xs leading-relaxed text-muted">
-        Ingestion settings are global in this prototype: 512-token chunks with
-        15% overlap, embedded locally with BGE-M3.
+        {t("documents.ingestionNote", { size: 512, overlap: 100 })}
       </p>
 
       {document.chunks > 0 && (
@@ -69,7 +77,7 @@ export function DocumentDetails({
           to="/retrieval"
           className={buttonStyles("secondary", "w-full sm:w-auto")}
         >
-          Inspect retrieved chunks
+          {t("documents.inspectChunks")}
           <ArrowRight size={14} aria-hidden="true" />
         </Link>
       )}

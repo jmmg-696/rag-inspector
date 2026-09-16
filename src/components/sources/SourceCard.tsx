@@ -1,4 +1,5 @@
 import { ArrowUpRight, FileText } from "lucide-react";
+import { useI18n } from "../../hooks/useI18n";
 import type { SourceReference } from "../../types/domain";
 import { SimilarityBar } from "../ui/SimilarityBar";
 import { cn } from "../../lib/cn";
@@ -12,6 +13,7 @@ export function SourceCard({
   index: number;
   onOpen: () => void;
 }) {
+  const { t } = useI18n();
   return (
     <button
       type="button"
@@ -32,7 +34,7 @@ export function SourceCard({
               {source.document}
             </span>
             <span className="block font-mono text-[11px] text-faint">
-              Page {source.page}
+              {t("detail.chunk.page", { page: source.page })}
             </span>
           </span>
         </span>
@@ -44,7 +46,7 @@ export function SourceCard({
       </span>
 
       <span className="mt-4 flex items-center justify-between font-mono text-[11px] text-muted">
-        <span>Similarity</span>
+        <span>{t("retrieval.similarity")}</span>
         <span className="font-medium text-ink">
           {Math.round(source.similarity * 100)}%
         </span>

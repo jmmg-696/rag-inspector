@@ -4,7 +4,9 @@ import { Card } from "../components/ui/Card";
 import { PageHeader } from "../components/ui/PageHeader";
 import { StatusBadge } from "../components/ui/StatusBadge";
 import { RetrievalResult } from "../components/retrieval/RetrievalResult";
+import { useI18n } from "../hooks/useI18n";
 import { buttonStyles } from "../lib/buttonStyles";
+import { formatChunkCount } from "../lib/format";
 import {
   mockIndexedChunkCount,
   mockRetrievalQuery,
@@ -13,18 +15,19 @@ import {
 } from "../data/mockRetrieval";
 
 export default function RetrievalPage() {
+  const { t } = useI18n();
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Retrieval Inspector"
-        description="See which chunks your RAG system actually retrieves."
-        badge={<StatusBadge label="Mocked retrieval" tone="neutral" />}
+        title={t("retrieval.title")}
+        description={t("retrieval.description")}
+        badge={<StatusBadge label={t("retrieval.badge")} tone="neutral" />}
       />
 
       <Card>
         <div className="px-5 py-5 sm:px-6">
           <p className="font-mono text-[10px] uppercase tracking-widest text-faint">
-            Query
+            {t("retrieval.query")}
           </p>
           <p className="mt-2 text-lg font-medium tracking-tight text-ink">
             {mockRetrievalQuery}
@@ -44,12 +47,13 @@ export default function RetrievalPage() {
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="text-sm font-semibold tracking-tight text-ink">
-              Retrieved Chunks
+              {t("retrieval.chunksTitle")}
             </h2>
             <p className="mt-0.5 text-sm text-muted">
-              {mockRetrievedChunks.length} of{" "}
-              {mockIndexedChunkCount.toLocaleString("en-US")} indexed chunks,
-              ranked by semantic similarity.
+              {t("retrieval.chunksDescription", {
+                count: mockRetrievedChunks.length,
+                total: formatChunkCount(mockIndexedChunkCount),
+              })}
             </p>
           </div>
           <Link
@@ -57,7 +61,7 @@ export default function RetrievalPage() {
             className={buttonStyles("secondary", "h-8 px-3 text-xs")}
           >
             <MessageSquareText size={13} aria-hidden="true" />
-            Try another query
+            {t("retrieval.tryAnother")}
           </Link>
         </div>
 

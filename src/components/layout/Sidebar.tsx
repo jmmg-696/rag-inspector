@@ -1,6 +1,8 @@
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
+import { useI18n } from "../../hooks/useI18n";
 import { cn } from "../../lib/cn";
+import { LanguageSelect } from "./LanguageSelect";
 import { LogoMark } from "./Logo";
 import { NavList } from "./NavList";
 import { ThemeToggle } from "./ThemeToggle";
@@ -8,6 +10,7 @@ import { ThemeToggle } from "./ThemeToggle";
 const SIDEBAR_COLLAPSED_KEY = "rag-inspector:sidebar-collapsed";
 
 export function Sidebar() {
+  const { t } = useI18n();
   const [collapsed, setCollapsed] = useLocalStorage(
     SIDEBAR_COLLAPSED_KEY,
     false
@@ -33,7 +36,7 @@ export function Sidebar() {
               RAG <span className="text-accent">Inspector</span>
             </p>
             <p className="truncate font-mono text-[9px] uppercase tracking-widest text-faint">
-              Visual RAG playground
+              {t("app.tagline")}
             </p>
           </div>
         )}
@@ -51,7 +54,7 @@ export function Sidebar() {
       >
         <span
           className={cn("flex items-center gap-2", collapsed && "flex-col")}
-          title="Local mode — everything runs on your machine"
+          title={t("common.localBody")}
         >
           <span className="relative flex h-1.5 w-1.5">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-50" />
@@ -59,16 +62,23 @@ export function Sidebar() {
           </span>
           {!collapsed && (
             <span className="font-mono text-[10px] uppercase tracking-widest text-muted">
-              Local
+              {t("common.local")}
             </span>
           )}
         </span>
-        <span className={cn("flex items-center gap-1", collapsed && "flex-col")}>
+        <span
+          className={cn("flex items-center gap-1", collapsed && "flex-col")}
+        >
+          {!collapsed && <LanguageSelect />}
           <ThemeToggle />
           <button
             type="button"
             onClick={() => setCollapsed((c) => !c)}
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-label={
+              collapsed
+                ? t("common.expandSidebar")
+                : t("common.collapseSidebar")
+            }
             className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted transition-colors hover:bg-elevated hover:text-ink"
           >
             {collapsed ? (

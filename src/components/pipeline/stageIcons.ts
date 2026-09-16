@@ -20,4 +20,5 @@ export const stageIcons: Record<StageIconKey, LucideIcon> = {
   context: Layers,
   llm: Cpu,
   answer: MessageSquareText,
+  question: MessageSquareText,
 };

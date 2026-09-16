@@ -81,7 +81,6 @@ export const mockLearnSections: LearnSection[] = [
     text: "The LLM generates an answer using that context — locally, and with citations back to the chunks it actually used.",
     visual: {
       kind: "generation",
-      prompt: "Answer using only this context. Cite sources…",
       answer:
         "The request must first be reviewed by the responsible area and then approved by the designated approver.",
     },

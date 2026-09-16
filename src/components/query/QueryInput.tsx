@@ -1,5 +1,6 @@
 import { LoaderCircle } from "lucide-react";
 import type { KeyboardEvent } from "react";
+import { useI18n } from "../../hooks/useI18n";
 import { Button } from "../ui/Button";
 
 export function QueryInput({
@@ -13,6 +14,7 @@ export function QueryInput({
   onSubmit: () => void;
   busy?: boolean;
 }) {
+  const { t } = useI18n();
   const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
@@ -31,7 +33,7 @@ export function QueryInput({
       className="rounded-xl border border-line bg-surface p-3 shadow-sm transition-colors focus-within:border-accent/50 sm:p-4"
     >
       <label htmlFor="rag-query" className="sr-only">
-        Ask your knowledge base
+        {t("playground.placeholder")}
       </label>
       <textarea
         id="rag-query"
@@ -40,12 +42,12 @@ export function QueryInput({
         onKeyDown={handleKeyDown}
         rows={2}
         spellCheck={false}
-        placeholder="Ask your knowledge base…"
+        placeholder={t("playground.placeholder")}
         className="w-full resize-none bg-transparent text-base leading-relaxed text-ink placeholder:text-faint focus:outline-none sm:text-lg"
       />
       <div className="mt-2 flex items-center justify-between gap-3">
         <p className="hidden font-mono text-[11px] text-faint sm:block">
-          Enter to run · Shift+Enter for a new line
+          {t("playground.hint")}
         </p>
         <Button
           type="submit"
@@ -55,7 +57,7 @@ export function QueryInput({
           {busy ? (
             <LoaderCircle size={15} className="animate-spin" aria-hidden="true" />
           ) : null}
-          {busy ? "Running…" : "Ask"}
+          {busy ? t("playground.running") : t("playground.ask")}
           {!busy && (
             <kbd
               aria-hidden="true"

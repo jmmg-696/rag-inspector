@@ -1,5 +1,6 @@
-import type { EvalRun } from "../../types/domain";
+import { useI18n } from "../../hooks/useI18n";
 import { evalStatusMeta } from "../../lib/evalStatus";
+import type { EvalRun } from "../../types/domain";
 import { StatusBadge } from "../ui/StatusBadge";
 
 const th =
@@ -7,26 +8,27 @@ const th =
 const td = "px-4 py-3.5 text-sm text-muted first:pl-5";
 
 export function EvalResultsTable({ runs }: { runs: EvalRun[] }) {
+  const { t } = useI18n();
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[720px] border-collapse">
-        <caption className="sr-only">Evaluation runs</caption>
+        <caption className="sr-only">{t("evaluation.runs.title")}</caption>
         <thead>
           <tr className="border-b border-line">
             <th scope="col" className={th}>
-              Question
+              {t("common.table.query")}
             </th>
             <th scope="col" className={th}>
-              Expected
+              {t("evaluation.table.expected")}
             </th>
             <th scope="col" className={`${th} w-40`}>
-              Retrieved
+              {t("evaluation.table.retrieved")}
             </th>
             <th scope="col" className={`${th} w-20`}>
-              Score
+              {t("evaluation.table.score")}
             </th>
             <th scope="col" className={`${th} w-28`}>
-              Status
+              {t("evaluation.table.status")}
             </th>
           </tr>
         </thead>
@@ -45,7 +47,10 @@ export function EvalResultsTable({ runs }: { runs: EvalRun[] }) {
                   {run.score.toFixed(2)}
                 </td>
                 <td className={td}>
-                  <StatusBadge label={status.label} tone={status.tone} />
+                  <StatusBadge
+                    label={t(status.labelKey)}
+                    tone={status.tone}
+                  />
                 </td>
               </tr>
             );

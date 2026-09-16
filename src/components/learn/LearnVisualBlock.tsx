@@ -1,8 +1,11 @@
 import { FileText } from "lucide-react";
+import { useI18n } from "../../hooks/useI18n";
 import type { LearnVisual } from "../../types/domain";
 import { SimilarityBar } from "../ui/SimilarityBar";
 
 export function LearnVisualBlock({ visual }: { visual: LearnVisual }) {
+  const { t } = useI18n();
+
   switch (visual.kind) {
     case "documents":
       return (
@@ -38,9 +41,13 @@ export function LearnVisualBlock({ visual }: { visual: LearnVisual }) {
             ))}
           </div>
           <div className="mt-2.5 flex flex-wrap justify-between gap-x-4 font-mono text-[11px] text-faint">
-            <span>{visual.size} tokens / chunk</span>
-            <span>{visual.overlap}% overlap</span>
-            <span>{visual.total.toLocaleString("en-US")} chunks</span>
+            <span>{t("learn.visual.tokensPerChunk", { size: visual.size })}</span>
+            <span>{t("learn.visual.overlap", { overlap: visual.overlap })}</span>
+            <span>
+              {t("learn.visual.totalChunks", {
+                total: visual.total.toLocaleString("en-US"),
+              })}
+            </span>
           </div>
         </div>
       );
@@ -99,9 +106,10 @@ export function LearnVisualBlock({ visual }: { visual: LearnVisual }) {
             <div className="bg-accent" style={{ width: `${usedPct}%` }} />
           </div>
           <p className="mt-1.5 font-mono text-[11px] text-faint">
-            {usedTokens.toLocaleString("en-US")} /{" "}
-            {visual.window.toLocaleString("en-US")} tokens of the context
-            window
+            {t("learn.visual.contextWindow", {
+              used: usedTokens.toLocaleString("en-US"),
+              window: visual.window.toLocaleString("en-US"),
+            })}
           </p>
           <ul className="mt-3 space-y-1.5">
             {visual.chunks.map((chunk, i) => (
@@ -121,7 +129,7 @@ export function LearnVisualBlock({ visual }: { visual: LearnVisual }) {
       return (
         <div className="space-y-2.5">
           <p className="rounded-md border border-line bg-surface px-3 py-2.5 font-mono text-[11px] text-faint">
-            {visual.prompt}
+            {t("learn.visual.samplePrompt")}
           </p>
           <p className="rounded-md border border-accent/40 bg-accent-soft px-3 py-2.5 text-sm leading-relaxed text-ink">
             {visual.answer}

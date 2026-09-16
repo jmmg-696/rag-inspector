@@ -1,3 +1,4 @@
+import { useI18n } from "../../hooks/useI18n";
 import type { RecentQuery } from "../../types/domain";
 import { SimilarityBar } from "../ui/SimilarityBar";
 
@@ -6,26 +7,27 @@ const th =
 const td = "px-4 py-3.5 text-sm text-muted first:pl-5";
 
 export function RecentQueriesTable({ queries }: { queries: RecentQuery[] }) {
+  const { t } = useI18n();
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[640px] border-collapse">
-        <caption className="sr-only">Recent queries</caption>
+        <caption className="sr-only">{t("overview.recent.title")}</caption>
         <thead>
           <tr className="border-b border-line">
             <th scope="col" className={th}>
-              Query
+              {t("common.table.query")}
             </th>
             <th scope="col" className={`${th} w-40`}>
-              Retrieval score
+              {t("common.table.retrievalScore")}
             </th>
             <th scope="col" className={`${th} w-20`}>
-              Chunks
+              {t("common.table.chunks")}
             </th>
             <th scope="col" className={`${th} w-28`}>
-              Response time
+              {t("common.table.responseTime")}
             </th>
             <th scope="col" className={`${th} w-24`}>
-              Ran
+              {t("common.table.ran")}
             </th>
           </tr>
         </thead>

@@ -1,9 +1,11 @@
 import { useEffect } from "react";
 import { X } from "lucide-react";
+import { useI18n } from "../../hooks/useI18n";
 import { LogoMark } from "./Logo";
 import { NavList } from "./NavList";
 
 export function MobileNav({ onClose }: { onClose: () => void }) {
+  const { t } = useI18n();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -21,11 +23,11 @@ export function MobileNav({ onClose }: { onClose: () => void }) {
       className="fixed inset-0 z-50 lg:hidden"
       role="dialog"
       aria-modal="true"
-      aria-label="Site navigation"
+      aria-label={t("nav.mainLabel")}
     >
       <button
         type="button"
-        aria-label="Close navigation"
+        aria-label={t("common.closeNav")}
         onClick={onClose}
         className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
       />
@@ -40,7 +42,7 @@ export function MobileNav({ onClose }: { onClose: () => void }) {
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close navigation"
+            aria-label={t("common.closeNav")}
             autoFocus
             className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted transition-colors hover:bg-elevated hover:text-ink"
           >
@@ -56,7 +58,7 @@ export function MobileNav({ onClose }: { onClose: () => void }) {
             <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
           </span>
           <span className="font-mono text-[10px] uppercase tracking-widest text-muted">
-            Local mode
+            {t("overview.badgeLocal")}
           </span>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { FileText } from "lucide-react";
+import { useI18n } from "../../hooks/useI18n";
 import type { KnowledgeDocument } from "../../types/domain";
 import { documentStatusMeta } from "../../lib/documentStatus";
 import { formatChunkCount } from "../../lib/format";
@@ -15,29 +16,30 @@ export function DocumentTable({
   documents: KnowledgeDocument[];
   onSelect: (document: KnowledgeDocument) => void;
 }) {
+  const { t } = useI18n();
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[720px] border-collapse">
-        <caption className="sr-only">Indexed documents</caption>
+        <caption className="sr-only">{t("documents.caption")}</caption>
         <thead>
           <tr className="border-b border-line">
             <th scope="col" className={th}>
-              Document
+              {t("common.table.document")}
             </th>
             <th scope="col" className={`${th} w-24`}>
-              Type
+              {t("common.table.type")}
             </th>
             <th scope="col" className={`${th} w-20`}>
-              Pages
+              {t("common.table.pages")}
             </th>
             <th scope="col" className={`${th} w-24`}>
-              Chunks
+              {t("common.table.chunks")}
             </th>
             <th scope="col" className={`${th} w-32`}>
-              Status
+              {t("evaluation.table.status")}
             </th>
             <th scope="col" className={`${th} w-28`}>
-              Added
+              {t("common.table.added")}
             </th>
           </tr>
         </thead>
@@ -76,7 +78,7 @@ export function DocumentTable({
                 </td>
                 <td className={td}>
                   <StatusBadge
-                    label={status.label}
+                    label={t(status.labelKey)}
                     tone={status.tone}
                     pulse={status.pulse}
                   />

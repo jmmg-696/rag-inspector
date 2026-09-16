@@ -1,15 +1,17 @@
 import { Outlet } from "react-router-dom";
+import { useI18n } from "../../hooks/useI18n";
 import { Sidebar } from "./Sidebar";
 import { TopBar } from "./TopBar";
 
 export function AppLayout() {
+  const { t } = useI18n();
   return (
     <div className="min-h-screen bg-canvas">
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-surface focus:px-3 focus:py-2 focus:text-sm focus:shadow-md"
       >
-        Skip to content
+        {t("common.skipToContent")}
       </a>
       <TopBar />
       <div className="flex">

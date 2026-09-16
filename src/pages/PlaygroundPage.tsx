@@ -12,6 +12,8 @@ import { SourceCard } from "../components/sources/SourceCard";
 import { getRagRun } from "../data/mockPlaygroundRun";
 import { mockQueryPipelineStages } from "../data/mockPipeline";
 import { mockDefaultQuestion } from "../data/mockQueries";
+import { useI18n } from "../hooks/useI18n";
+import { usePipelineStages } from "../hooks/usePipelineStages";
 import type { RagRunResult } from "../types/domain";
 
 type RunPhase = "idle" | "running" | "done";
@@ -19,7 +21,9 @@ type RunPhase = "idle" | "running" | "done";
 const STEP_DURATIONS_MS = [420, 380, 460, 360, 900, 420];
 
 export default function PlaygroundPage() {
+  const { t } = useI18n();
   const navigate = useNavigate();
+  const stages = usePipelineStages(mockQueryPipelineStages);
   const [question, setQuestion] = useState(mockDefaultQuestion);
   const [phase, setPhase] = useState<RunPhase>("idle");
   const [step, setStep] = useState(0);
@@ -76,13 +80,13 @@ export default function PlaygroundPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Playground"
-        description="Ask questions and inspect how RAG finds the answer."
-        badge={<StatusBadge label="Demo run" tone="accent" />}
+        title={t("playground.title")}
+        description={t("playground.description")}
+        badge={<StatusBadge label={t("common.demoRun")} tone="accent" />}
         actions={
           phase !== "idle" ? (
             <Button variant="secondary" onClick={handleReset}>
-              New run
+              {t("playground.newRun")}
             </Button>
           ) : undefined
         }
@@ -98,27 +102,27 @@ export default function PlaygroundPage() {
       {phase === "idle" ? (
         <EmptyState
           icon={FlaskConical}
-          title="RAG shouldn’t be a black box."
-          description="Run a question and watch it travel through embedding, retrieval, context and generation."
+          title={t("playground.empty.title")}
+          description={t("playground.empty.body")}
         />
       ) : (
         <div
           id="pipeline-run"
           className="grid gap-4 lg:grid-cols-[300px_minmax(0,1fr)] lg:items-start"
         >
-          <Card title="Pipeline run">
+          <Card title={t("playground.run.title")}>
             <div className="space-y-2.5 p-4 sm:p-5">
               <p className="truncate border-b border-line pb-3 font-mono text-[11px] text-faint">
-                Q: {question}
+                {t("playground.questionEcho", { question })}
               </p>
-              {mockQueryPipelineStages.map((stage, index) => (
+              {stages.map((stage, index) => (
                 <PipelineStep
                   key={stage.id}
                   stage={stage}
                   orientation="vertical"
                   state={stageState(index)}
                   index={index}
-                  total={mockQueryPipelineStages.length}
+                  total={stages.length}
                 />
               ))}
             </div>
@@ -126,19 +130,18 @@ export default function PlaygroundPage() {
 
           {phase === "done" && result ? (
             <div className="space-y-4">
-              <Card title="Answer">
+              <Card title={t("playground.answer.title")}>
                 <div className="px-5 py-5 sm:px-6">
                   <p className="text-base leading-relaxed text-ink">
                     {result.answer.text}
                   </p>
                   <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-line pt-4">
-                    <StatusBadge
-                      label={result.answer.model}
-                      tone="neutral"
-                    />
+                    <StatusBadge label={result.answer.model} tone="neutral" />
                     <span className="font-mono text-[11px] text-faint">
-                      {result.answer.latencyMs} ms · 3 chunks of context ·
-                      mocked in this prototype
+                      {t("playground.answer.meta", {
+                        latency: result.answer.latencyMs,
+                        chunks: result.sources.length + 1,
+                      })}
                     </span>
                   </div>
                 </div>
@@ -146,11 +149,10 @@ export default function PlaygroundPage() {
 
               <div>
                 <h2 className="text-sm font-semibold tracking-tight text-ink">
-                  Sources
+                  {t("playground.sources.title")}
                 </h2>
                 <p className="mt-0.5 text-sm text-muted">
-                  The chunks the answer was grounded in. Click one to inspect
-                  retrieval.
+                  {t("playground.sources.hint")}
                 </p>
                 <div className="mt-4 grid gap-4 sm:grid-cols-2">
                   {result.sources.map((source, index) => (
@@ -165,10 +167,10 @@ export default function PlaygroundPage() {
               </div>
             </div>
           ) : (
-            <Card title="Processing">
+            <Card title={t("playground.processing")}>
               <div className="px-5 py-10 text-center sm:px-6">
                 <p className="animate-pulse font-mono text-xs uppercase tracking-widest text-faint">
-                  Retrieving context and generating…
+                  {t("playground.processingHint")}
                 </p>
               </div>
             </Card>

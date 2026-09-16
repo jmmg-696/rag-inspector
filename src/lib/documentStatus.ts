@@ -1,11 +1,16 @@
 import type { StatusBadgeTone } from "../components/ui/StatusBadge";
+import type { TranslationKey } from "../i18n";
 import type { DocumentStatus } from "../types/domain";
 
 export const documentStatusMeta: Record<
   DocumentStatus,
-  { label: string; tone: StatusBadgeTone; pulse: boolean }
+  { labelKey: TranslationKey; tone: StatusBadgeTone; pulse: boolean }
 > = {
-  ready: { label: "Ready", tone: "success", pulse: false },
-  processing: { label: "Processing", tone: "warning", pulse: true },
-  failed: { label: "Failed", tone: "danger", pulse: false },
+  ready: { labelKey: "common.status.ready", tone: "success", pulse: false },
+  processing: {
+    labelKey: "common.status.processing",
+    tone: "warning",
+    pulse: true,
+  },
+  failed: { labelKey: "common.status.failed", tone: "danger", pulse: false },
 };

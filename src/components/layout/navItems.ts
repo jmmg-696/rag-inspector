@@ -9,24 +9,25 @@ import {
   Scissors,
   type LucideIcon,
 } from "lucide-react";
+import type { TranslationKey } from "../../i18n";
 
 export interface NavItem {
-  label: string;
+  labelKey: TranslationKey;
   to: string;
   icon: LucideIcon;
 }
 
 export const primaryNav: NavItem[] = [
-  { label: "Overview", to: "/", icon: LayoutDashboard },
-  { label: "Documents", to: "/documents", icon: FileText },
-  { label: "Playground", to: "/playground", icon: FlaskConical },
-  { label: "Retrieval", to: "/retrieval", icon: Radar },
-  { label: "Evaluation", to: "/evaluation", icon: Gauge },
+  { labelKey: "nav.overview", to: "/", icon: LayoutDashboard },
+  { labelKey: "nav.documents", to: "/documents", icon: FileText },
+  { labelKey: "nav.playground", to: "/playground", icon: FlaskConical },
+  { labelKey: "nav.retrieval", to: "/retrieval", icon: Radar },
+  { labelKey: "nav.evaluation", to: "/evaluation", icon: Gauge },
 ];
 
 export const learnNav: NavItem[] = [
-  { label: "How RAG works", to: "/learn", icon: BookOpen },
-  { label: "Chunking", to: "/learn#chunking", icon: Scissors },
-  { label: "Embeddings", to: "/learn#embeddings", icon: Binary },
-  { label: "Vector Search", to: "/learn#vector-search", icon: Radar },
+  { labelKey: "nav.howRagWorks", to: "/learn", icon: BookOpen },
+  { labelKey: "nav.chunking", to: "/learn#chunking", icon: Scissors },
+  { labelKey: "nav.embeddings", to: "/learn#embeddings", icon: Binary },
+  { labelKey: "nav.vectorSearch", to: "/learn#vector-search", icon: Radar },
 ];

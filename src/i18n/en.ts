@@ -1,0 +1,352 @@
+export const en = {
+  "app.name": "RAG Inspector",
+  "app.tagline": "Visual RAG playground",
+
+  "common.skipToContent": "Skip to content",
+  "common.local": "Local",
+  "common.localMode": "LOCAL MODE",
+  "common.localBody":
+    "Documents are processed by the local RAG Inspector backend. No external AI API is required.",
+  "common.retry": "Try again",
+  "common.close": "Close",
+  "common.closeNav": "Close navigation",
+  "common.comingSoon": "Coming soon",
+  "common.running": "Running",
+  "common.step": "step {index} of {total}",
+  "common.demoRun": "Demo run",
+  "common.demoData": "Demo data",
+  "common.pages": "Pages",
+  "common.words": "Words",
+  "common.characters": "Characters",
+  "common.chunks": "Chunks",
+  "common.tokens": "Tokens",
+  "common.overlap": "Overlap",
+  "common.chunkSize": "Chunk size",
+  "common.status.ready": "Ready",
+  "common.status.processing": "Processing",
+  "common.status.failed": "Failed",
+  "common.table.query": "Query",
+  "common.table.retrievalScore": "Retrieval score",
+  "common.table.chunks": "Chunks",
+  "common.table.responseTime": "Response time",
+  "common.table.ran": "Ran",
+  "common.table.document": "Document",
+  "common.table.type": "Type",
+  "common.table.pages": "Pages",
+  "common.table.added": "Added",
+  "common.expandSidebar": "Expand sidebar",
+  "common.collapseSidebar": "Collapse sidebar",
+  "common.lightMode": "Switch to light mode",
+  "common.darkMode": "Switch to dark mode",
+  "common.language": "Language",
+
+  "nav.overview": "Overview",
+  "nav.mainLabel": "Main navigation",
+  "nav.documents": "Documents",
+  "nav.playground": "Playground",
+  "nav.retrieval": "Retrieval",
+  "nav.evaluation": "Evaluation",
+  "nav.learn": "Learn",
+  "nav.howRagWorks": "How RAG works",
+  "nav.chunking": "Chunking",
+  "nav.embeddings": "Embeddings",
+  "nav.vectorSearch": "Vector Search",
+
+  "overview.description":
+    "Understand what happens between a question and an AI-generated answer.",
+  "overview.badgeLocal": "Local mode",
+  "overview.metric.documents": "Documents",
+  "overview.metric.chunks": "Chunks",
+  "overview.metric.vectors": "Vectors",
+  "overview.metric.queries": "Queries",
+  "overview.metric.documentsHint": "+2 this week",
+  "overview.metric.chunksHint": "512 tokens · 15% overlap",
+  "overview.metric.vectorsHint": "BGE-M3 · 1,024 dim",
+  "overview.metric.queriesHint": "38 today",
+  "overview.pipeline.title": "RAG Pipeline",
+  "overview.pipeline.description":
+    "Every answer travels the same path. Hover or click a stage to inspect it.",
+  "overview.pipeline.stageLabel": "Pipeline stage",
+  "overview.pipeline.legend.real": "Available today",
+  "overview.pipeline.legend.next": "Current phase",
+  "overview.pipeline.legend.planned": "Planned",
+  "overview.recent.title": "Recent Queries",
+  "overview.recent.description":
+    "Latest questions run against the indexed knowledge.",
+
+  "pipeline.stages.documents.label": "Documents",
+  "pipeline.stages.documents.description":
+    "Your knowledge starts as real files — PDFs, markdown docs, notes. Upload them and they are processed locally.",
+  "pipeline.stages.chunking.label": "Chunking",
+  "pipeline.stages.chunking.description":
+    "Documents are divided into smaller, overlapping chunks so the model can retrieve precise fragments instead of whole files.",
+  "pipeline.stages.embeddings.label": "Embeddings",
+  "pipeline.stages.embeddings.description":
+    "Each chunk is converted into a vector — a list of numbers that captures its meaning, not just its keywords.",
+  "pipeline.stages.vector-store.label": "Vector Store",
+  "pipeline.stages.vector-store.description":
+    "Vectors are stored in an index that finds semantically similar pieces at scale, locally on your machine.",
+  "pipeline.stages.retrieval.label": "Retrieval",
+  "pipeline.stages.retrieval.description":
+    "Finds the most semantically relevant chunks for a user's question by comparing the question's embedding against the stored vectors.",
+  "pipeline.stages.context.label": "Context",
+  "pipeline.stages.context.description":
+    "The retrieved chunks are assembled, with their sources, into the prompt that the model will actually see.",
+  "pipeline.stages.llm.label": "Local LLM",
+  "pipeline.stages.llm.description":
+    "A model running locally through Ollama generates an answer grounded in the provided context.",
+  "pipeline.stages.answer.label": "Answer",
+  "pipeline.stages.answer.description":
+    "The generated answer comes back with its sources — grounded in your documents, traceable and inspectable.",
+  "pipeline.stages.question.label": "Question",
+  "pipeline.stages.question.description":
+    "You ask something about your knowledge base.",
+
+  "playground.title": "Playground",
+  "playground.description":
+    "Ask questions and inspect how RAG finds the answer.",
+  "playground.newRun": "New run",
+  "playground.placeholder": "Ask your knowledge base…",
+  "playground.hint": "Enter to run · Shift+Enter for a new line",
+  "playground.ask": "Ask",
+  "playground.running": "Running…",
+  "playground.empty.title": "RAG shouldn't be a black box.",
+  "playground.empty.body":
+    "Run a question and watch it travel through embedding, retrieval, context and generation.",
+  "playground.run.title": "Pipeline run",
+  "playground.processing": "Processing",
+  "playground.processingHint": "Retrieving context and generating…",
+  "playground.answer.title": "Answer",
+  "playground.answer.meta":
+    "{latency} ms · {chunks} chunks of context · mocked in this prototype",
+  "playground.sources.title": "Sources",
+  "playground.sources.hint":
+    "The chunks the answer was grounded in. Click one to inspect retrieval.",
+  "playground.questionEcho": "Q: {question}",
+
+  "retrieval.title": "Retrieval Inspector",
+  "retrieval.description":
+    "See which chunks your RAG system actually retrieves.",
+  "retrieval.badge": "Mocked retrieval",
+  "retrieval.query": "Query",
+  "retrieval.chunksTitle": "Retrieved Chunks",
+  "retrieval.chunksDescription":
+    "{count} of {total} indexed chunks, ranked by semantic similarity.",
+  "retrieval.tryAnother": "Try another query",
+  "retrieval.empty.title": "No chunks crossed the similarity threshold",
+  "retrieval.empty.body":
+    "Nothing in the index was close enough to this query. Try asking something else in the Playground.",
+  "retrieval.similarity": "Similarity",
+  "retrieval.rank": "Rank {rank}",
+
+  "evaluation.title": "Evaluation",
+  "evaluation.description": "Measure the quality of your RAG pipeline.",
+  "evaluation.badge": "Demo metrics",
+  "evaluation.notice":
+    "These are hypothetical quality metrics shown with mock data. Real evaluation runs (RAGAS-style scoring, golden datasets) arrive with the pipeline integration.",
+  "evaluation.metric.answer-relevance.label": "Answer Relevance",
+  "evaluation.metric.answer-relevance.description":
+    "Is the generated answer on-topic for the question?",
+  "evaluation.metric.context-relevance.label": "Context Relevance",
+  "evaluation.metric.context-relevance.description":
+    "Are the retrieved chunks relevant to the question?",
+  "evaluation.metric.faithfulness.label": "Faithfulness",
+  "evaluation.metric.faithfulness.description":
+    "Is every claim in the answer supported by the context?",
+  "evaluation.metric.retrieval-precision.label": "Retrieval Precision",
+  "evaluation.metric.retrieval-precision.description":
+    "How many retrieved chunks were actually used?",
+  "evaluation.runs.title": "Evaluated Queries",
+  "evaluation.runs.description":
+    "{passed} of {total} questions passed all checks in the last demo run.",
+  "evaluation.table.expected": "Expected",
+  "evaluation.table.retrieved": "Retrieved",
+  "evaluation.table.score": "Score",
+  "evaluation.table.status": "Status",
+  "evaluation.status.pass": "Pass",
+  "evaluation.status.warn": "Review",
+  "evaluation.status.fail": "Fail",
+
+  "documents.title": "Documents",
+  "documents.description":
+    "Manage the knowledge used by your RAG pipeline.",
+  "documents.upload": "Upload document",
+  "documents.search.label": "Search documents",
+  "documents.search.placeholder": "Search documents…",
+  "documents.count": "{shown} of {total} documents",
+  "documents.caption": "Indexed documents",
+  "documents.noResults.title": "No documents match your search",
+  "documents.noResults.body":
+    "Nothing indexed contains “{term}”. Try a different term.",
+  "documents.noResults.clear": "Clear search",
+  "documents.badge.demo": "Demo",
+  "documents.badge.local": "Local",
+  "documents.details.title": "Document details",
+  "documents.ingestionNote":
+    "Ingestion settings are per upload: {size}-token chunks with {overlap}-token overlap. Token counts are approximated at ~4 characters per token.",
+  "documents.inspectChunks": "Inspect retrieved chunks",
+  "documents.notIndexed": "Not chunked yet",
+  "documents.uploadModal.dropTitle": "Drop PDF or Markdown files here",
+  "documents.uploadModal.dropHint":
+    "Or browse from your machine — up to 50 MB per file.",
+  "documents.uploadModal.note":
+    "Supported formats: PDF, DOCX, TXT and Markdown. Files are parsed by the local backend and never leave this machine.",
+  "documents.uploadModal.browse": "Browse files",
+  "documents.uploadModal.settings": "Chunking settings for this upload",
+  "documents.uploadModal.selectHint": "PDF, DOCX, TXT or Markdown",
+  "documents.uploadModal.selected": "Selected file: {name}",
+  "documents.miniPipeline.text": "Text",
+  "documents.uploadModal.ingest": "Ingest document",
+  "documents.uploadModal.ingesting": "Ingesting…",
+  "documents.uploadModal.hint":
+    "After ingestion you can see the extracted text and every chunk it produced.",
+
+  "backend.offline.title": "Local backend unavailable",
+  "backend.offline.body":
+    "Make sure the RAG Inspector backend is running locally: cd backend && uvicorn app.main:app --reload",
+  "backend.checking": "Checking backend…",
+  "backend.demoMode":
+    "Showing demo documents with mock data while the backend is offline.",
+
+  "detail.back": "Documents",
+  "detail.meta": "{type} · {count}",
+  "detail.page.singular": "page",
+  "detail.page.plural": "pages",
+  "detail.chunk.singular": "chunk",
+  "detail.chunk.plural": "chunks",
+  "detail.tab.overview": "Overview",
+  "detail.tab.text": "Extracted Text",
+  "detail.tab.chunks": "Chunks",
+  "detail.ingest.title": "Ingestion pipeline",
+  "detail.ingest.upload.label": "Upload",
+  "detail.ingest.upload.why":
+    "The file reached the local backend. Nothing was sent to any external API.",
+  "detail.ingest.extract.label": "Extract",
+  "detail.ingest.extract.why":
+    "The model cannot search your PDF directly. We first extract its text so the content can be processed by the pipeline.",
+  "detail.ingest.clean.label": "Clean",
+  "detail.ingest.clean.why":
+    "Extraction leaves formatting noise behind. Cleaning removes it without touching the actual content.",
+  "detail.ingest.chunk.label": "Chunk",
+  "detail.ingest.chunk.why":
+    "The document is divided into retrievable pieces — these chunks will later become vectors.",
+  "detail.ingest.ready.label": "Ready",
+  "detail.ingest.ready.why":
+    "The document is fully processed. Embeddings and retrieval will build on these exact chunks.",
+  "detail.cleaning.title": "Cleaning",
+  "detail.cleaning.original": "Original characters",
+  "detail.cleaning.cleaned": "Cleaned characters",
+  "detail.cleaning.removed": "Formatting artifacts removed",
+  "detail.text.page": "PAGE {page}",
+  "detail.text.whyTitle": "WHY THIS MATTERS",
+  "detail.text.whyBody":
+    "RAG works with text, not the visual PDF itself. This extracted text is the raw material for cleaning and chunking.",
+  "detail.chunks.title": "Chunks",
+  "detail.chunks.summary":
+    "{total} {unit} · {size}-token chunks · {overlap}-token overlap",
+  "detail.chunks.none":
+    "Adjust the chunking settings to see how the document splits.",
+  "detail.chunk.badge": "CHUNK #{index}",
+  "detail.chunk.page": "Page {page}",
+  "detail.chunk.pagesRange": "Pages {start} → {end}",
+  "detail.chunk.stats": "{tokens} tokens · {characters} characters",
+  "detail.chunk.prev": "Previous",
+  "detail.chunk.next": "Next",
+  "detail.chunk.of": "{current} / {total}",
+  "detail.chunk.textLabel": "TEXT",
+  "detail.chunk.panelTitle": "Chunk #{index}",
+  "detail.chunk.source": "Source",
+  "detail.chunk.selectedHint":
+    "Select a chunk to inspect it in detail.",
+  "detail.chunk.whyTitle": "WHY THIS CHUNK EXISTS",
+  "detail.chunk.whyBody":
+    "Large documents are split into smaller pieces so retrieval can later find the specific information relevant to a question.",
+  "detail.chunking.title": "Chunking",
+  "detail.chunking.sizeTip":
+    "Target size for each chunk, in approximate tokens (≈ 4 characters per token).",
+  "detail.chunking.overlapTip":
+    "Text shared between consecutive chunks, so important context is not lost at chunk boundaries.",
+  "detail.chunking.applies":
+    "Settings re-compute the chunk preview instantly. No embeddings are generated.",
+  "detail.chunking.visualTitle": "Document → chunks",
+  "detail.chunking.visualHint":
+    "The bar is the whole document. Translucent tails show text repeated by the overlap.",
+  "detail.overlap.whyTitle": "WHY OVERLAP?",
+  "detail.overlap.without": "Without overlap:",
+  "detail.overlap.with": "With overlap:",
+  "concept.tokenApprox.title": "What is a token?",
+  "concept.tokenApprox.body":
+    "Models measure text in tokens, not characters — roughly one token per four characters in English. Exact tokenization arrives with the embeddings phase.",
+
+  "learn.description":
+    "Retrieval-Augmented Generation, step by step — no hand-waving, no magic.",
+  "learn.badge": "Learning mode",
+  "learn.hero.statement": "RAG shouldn't be a black box.",
+  "learn.hero.body":
+    "It is a pipeline. Every step is visible, inspectable and testable. Here is what happens between your question and the answer.",
+  "learn.documents.title": "Documents",
+  "learn.documents.text":
+    "Your knowledge starts with documents. PDFs, markdown files and notes are indexed locally — nothing leaves your machine.",
+  "learn.chunking.title": "Chunking",
+  "learn.chunking.text":
+    "Documents are divided into smaller pieces. Chunks are big enough to hold meaning and small enough to retrieve precisely.",
+  "learn.embeddings.title": "Embeddings",
+  "learn.embeddings.text":
+    "Text is converted into vectors — lists of numbers where similar meanings land close together, even without shared keywords.",
+  "learn.vector-search.title": "Vector Search",
+  "learn.vector-search.text":
+    "Your question becomes a vector too. The system finds the stored chunks that are semantically closest to it.",
+  "learn.context.title": "Context",
+  "learn.context.text":
+    "Relevant chunks are provided to the LLM. This is the moment RAG changes the answer — the model is grounded in your documents.",
+  "learn.generation.title": "Generation",
+  "learn.generation.text":
+    "The LLM generates an answer using that context — locally, and with citations back to the chunks it actually used.",
+  "learn.visual.tokensPerChunk": "{size} tokens / chunk",
+  "learn.visual.overlap": "{overlap}% overlap",
+  "learn.visual.totalChunks": "{total} chunks",
+  "learn.visual.contextWindow":
+    "{used} / {window} tokens of the context window",
+  "learn.visual.samplePrompt": "Answer using only this context. Cite sources…",
+  "learn.cta.title": "Ready to see it on your own questions?",
+  "learn.cta.body":
+    "The Playground runs the same pipeline with visible sources.",
+  "learn.cta.action": "Open Playground",
+
+  "notFound.title": "404 — This page is not in the knowledge base",
+  "notFound.body":
+    "The route you requested could not be retrieved from this application.",
+  "notFound.back": "Back to Overview",
+
+  "error.unsupported_type.title": "Unsupported document",
+  "error.unsupported_type.body":
+    "RAG Inspector currently supports PDF, DOCX, TXT and Markdown files.",
+  "error.empty_document.title": "No readable text found",
+  "error.empty_document.body":
+    "We couldn't extract usable text from this document.",
+  "error.invalid_file.title": "Could not parse the file",
+  "error.invalid_file.body":
+    "The file appears to be corrupt or not a real PDF/DOCX document.",
+  "error.too_large.title": "File is too large",
+  "error.too_large.body":
+    "The document exceeds the 50 MB limit for local processing.",
+  "error.invalid_settings.title": "Invalid chunking settings",
+  "error.invalid_settings.body":
+    "Overlap must be smaller than the chunk size (between 64 and 4,096 tokens).",
+  "error.not_found.title": "Document not found",
+  "error.not_found.body": "This document no longer exists locally.",
+  "error.network.title": "Local backend unavailable",
+  "error.network.body":
+    "Make sure the RAG Inspector backend is running locally.",
+  "error.unknown.title": "Something went wrong",
+  "error.unknown.body": "The local backend returned an unexpected error.",
+
+  "emptyPipeline.title": "No documents yet",
+  "emptyPipeline.body":
+    "Upload a document to see how RAG turns raw files into searchable chunks.",
+  "emptyPipeline.future": "Future phases",
+  "emptyPipeline.upload": "Upload document"
+} as const;
+
+export type TranslationKey = keyof typeof en;
+export type TranslationDictionary = Record<TranslationKey, string>;
