@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { cn } from "../../lib/cn";
 
 export function MetricCard({
@@ -9,7 +10,7 @@ export function MetricCard({
   label: string;
   value: string;
   hint?: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
 }) {
   return (
     <div className="rounded-xl border border-line bg-surface p-5 shadow-sm transition-colors hover:border-line-strong">
