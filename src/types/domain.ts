@@ -204,6 +204,87 @@ export interface RetrievalSpace {
   query: { x: number; y: number } | null;
 }
 
+export interface LlmStatus {
+  available: boolean;
+  baseUrl: string;
+  configuredModel: string;
+  modelAvailable: boolean;
+  models: string[];
+}
+
+export interface GenerationSourcePayload {
+  sourceId: string;
+  documentId: string;
+  documentName: string;
+  chunkId: string;
+  chunkIndex: number;
+  pageStart: number;
+  pageEnd: number;
+  score: number;
+  estimatedTokens: number;
+  text: string;
+}
+
+export interface GenerationMetrics {
+  elapsedMs?: number;
+  completionTokens?: number;
+  promptTokens?: number;
+  tokensPerSecond?: number;
+}
+
+export interface GenerationResponse {
+  query: string;
+  model: string;
+  temperature: number;
+  retrieval: {
+    topK: number;
+    scoreThreshold: number;
+    filteredDocumentId: string | null;
+    corpusSize: number;
+    totalResults: number;
+    results: RetrievalHit[];
+    retrievalMs: number;
+  };
+  context: {
+    retrievedChunks: number;
+    includedChunks: number;
+    estimatedTokens: number;
+    sources: GenerationSourcePayload[];
+  };
+  prompt: {
+    system: string;
+    context: string;
+    user: string;
+    fullPrompt: string;
+  };
+  answer: string | null;
+  citations: {
+    verified: string[];
+    unresolved: number[];
+  };
+  generationMetrics: GenerationMetrics | null;
+}
+
+export type GenerationStage =
+  | "retrieving"
+  | "building_context"
+  | "building_prompt"
+  | "generating";
+
+export type GenerationEvent =
+  | { type: "stage"; stage: GenerationStage; model?: string; temperature?: number }
+  | {
+      type: "retrieval";
+      payload: {
+        corpus_size: number;
+        total_results: number;
+        retrieval_ms: number;
+      };
+    }
+  | { type: "token"; text: string }
+  | { type: "result"; payload: GenerationResponse }
+  | { type: "error"; code: string; message: string };
+
 export type StageIconKey =
   | "documents"
   | "chunking"
@@ -211,8 +292,10 @@ export type StageIconKey =
   | "vector-store"
   | "retrieval"
   | "context"
+  | "prompt"
   | "llm"
   | "answer"
+  | "sources"
   | "question";
 
 export type StageStatus = "done" | "current" | "upcoming";

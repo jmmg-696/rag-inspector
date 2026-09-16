@@ -53,6 +53,34 @@ const errorKeys: Record<string, { titleKey: TranslationKey; bodyKey: Translation
     titleKey: "error.validation.title",
     bodyKey: "error.validation.body",
   },
+  llm_unavailable: {
+    titleKey: "error.llm_unavailable.title",
+    bodyKey: "error.llm_unavailable.body",
+  },
+  llm_model_not_found: {
+    titleKey: "error.llm_model_not_found.title",
+    bodyKey: "error.llm_model_not_found.body",
+  },
+  llm_timeout: {
+    titleKey: "error.llm_timeout.title",
+    bodyKey: "error.llm_timeout.body",
+  },
+  generation_failed: {
+    titleKey: "error.generation_failed.title",
+    bodyKey: "error.generation_failed.body",
+  },
+  no_indexed_documents: {
+    titleKey: "error.no_indexed_documents.title",
+    bodyKey: "error.no_indexed_documents.body",
+  },
+  invalid_temperature: {
+    titleKey: "error.invalid_temperature.title",
+    bodyKey: "error.invalid_temperature.body",
+  },
+  cancelled: {
+    titleKey: "error.cancelled.title",
+    bodyKey: "error.cancelled.body",
+  },
   unknown: {
     titleKey: "error.unknown.title",
     bodyKey: "error.unknown.body",

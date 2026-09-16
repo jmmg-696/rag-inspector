@@ -1,10 +1,12 @@
 import {
   Binary,
+  Braces,
   Cpu,
   Database,
   FileText,
   Layers,
   MessageSquareText,
+  Quote,
   ScanSearch,
   Scissors,
   type LucideIcon,
@@ -18,7 +20,9 @@ export const stageIcons: Record<StageIconKey, LucideIcon> = {
   "vector-store": Database,
   retrieval: ScanSearch,
   context: Layers,
+  prompt: Braces,
   llm: Cpu,
   answer: MessageSquareText,
+  sources: Quote,
   question: MessageSquareText,
 };

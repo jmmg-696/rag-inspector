@@ -17,39 +17,57 @@ out. The interesting part — the actual *retrieval* — is hidden.
 layers: **what happened** (the real numbers) and **why it matters** (the human
 explanation).
 
-As of **Phase 4**, six of the eight pipeline stages are real and local. Ask a
-question and watch it become a BGE-M3 query embedding, a cosine top-K search
-in Qdrant and a ranked set of chunks — projected in the same 2D semantic
-space, with your query as a star.
+As of **Phase 5**, the entire RAG pipeline runs locally and every step is
+inspectable: ingest a document, embed it with BGE-M3, retrieve with Qdrant
+cosine search, assemble a budgeted context, **see the exact prompt sent to
+the model**, generate an answer with a local LLM through **Ollama**, and
+follow validated `[SOURCE_n]` citations back to the chunks they came from.
 
 ```text
 Documents → Chunking → Embeddings → Vector Store → Retrieval → Context → Local LLM → Answer
-  ● real      ● real      ● real        ● real        ● real      ○ Phase 5  ○ Phase 5    ○ Phase 5
+  ● real      ● real      ● real        ● real        ● real      ● real     ● real      ● real
 ```
 
-> **Phase 4 implements real semantic retrieval. LLM answer generation is
-> intentionally deferred to Phase 5** — the Playground stops at the real
-> retrieved context, and it says so.
+What remains for later phases is *evaluation science*, not plumbing:
+RAG vs No-RAG comparisons and measured quality metrics.
 
-No external AI APIs, no cloud services.
+No external AI APIs, no cloud services, no telemetry. By default, document
+content, embeddings, vectors and prompts never leave this machine — the
+processing path is Browser → local FastAPI → local BGE-M3 / Qdrant / Ollama.
 
-## Current Pipeline (Phase 4)
+## Current Pipeline (Phase 5 — complete)
 
 ```text
-DOCUMENT
-    ↓
-TEXT EXTRACTION
-    ↓
-CLEANING
-    ↓
-CHUNKING
-    ↓
-EMBEDDINGS (BGE-M3, local)
-    ↓
-QDRANT (local)
-    ↓
-USER QUESTION → QUERY EMBEDDING → COSINE TOP-K → RANKED CHUNKS
+DOCUMENT → EXTRACT → CLEAN → CHUNK → EMBEDDINGS → QDRANT
+                                                    ↓
+USER QUESTION → QUERY EMBEDDING → COSINE TOP-K → RETRIEVED CHUNKS
+                                                      ↓
+                                    CONTEXT → PROMPT → OLLAMA → ANSWER → SOURCES
 ```
+
+## Local LLM generation
+
+- **Ollama** (running as a native local process — not forced into Docker,
+  so GPU setups work naturally) with a **configurable model**:
+  `OLLAMA_MODEL=qwen3:8b` by default, any locally installed model works
+- The generation API owns the full orchestration: retrieval → context →
+  prompt → Ollama. The frontend never stitches these steps together itself
+- **Context budget**: whole chunks are packed in rank order up to
+  `RAG_MAX_CONTEXT_TOKENS` (default 4,000 estimated tokens); what was
+  included vs retrieved is always reported
+- **Prompt Inspector**: the actual text sent to the model — system rules,
+  labelled `[SOURCE_n]` context, user question — not an example
+- **Run Inspector**: per-stage facts: retrieval results and time, included
+  chunks, model, temperature, and only the timing/token metrics Ollama
+  really reports
+- **NDJSON streaming**: real stage events (`retrieving → building_context →
+  building_prompt → generating`) plus answer tokens as they arrive, with
+  cancellation. No simulated progress
+- **Citation validation**: `[SOURCE_n]` markers produced by the model are
+  checked against the context; unknown identifiers are shown as *unresolved
+  citations*, never promoted to real sources
+- **Honest wording**: an answer is "generated using the retrieved context
+  shown below" — grounding is never *claimed* as a guarantee
 
 ## Semantic Retrieval
 
@@ -76,9 +94,9 @@ Ranked chunks with similarity scores
 
 **Retrieval is not generation.** Retrieval answers "which of my documents
 are closest in meaning to this question?" — a mathematical comparison of
-vectors. Generation answers "what sentence should the user read?" — that
-needs an LLM, and it is Phase 5. RAG Inspector keeps the two visibly apart
-so you can debug one without guessing about the other.
+vectors. Generation answers "what sentence should the user read?" — a local
+LLM writes it. RAG Inspector keeps the two visibly apart (they even live in
+separate services) so you can debug one without guessing about the other.
 
 ```jsonc
 // POST /api/retrieval/search
@@ -115,7 +133,7 @@ Vectors are stored locally in Qdrant using cosine distance.
 
 - Collection `rag_inspector` is created automatically (1,024-dim, Cosine)
 - Every vector carries its payload: document, chunk index, page range, text
-  and token estimate — ready for Phase 4 retrieval
+  and token estimate — the payload retrieval and generation cite from
 - Deleting a document deletes its vectors too; no orphans
 - The **Vector Store** page shows connection state, statistics, an indexed
   chunk browser and per-vector inspection with a value heatmap
@@ -146,11 +164,11 @@ relationships, not the actual vector space.
   actual cosine scores, per-result “Why was this retrieved?” explanations,
   a query vector heatmap, and your query projected as a star in the
   semantic space with the top-K points highlighted
-- **Playground** — real retrieval end to end: question → query embedding →
-  Qdrant top-K → assembled context, and then an honest stop: *LLM
-  generation — Phase 5*. No fabricated answers
-- **Overview** — pipeline with real / next-phase / planned stage states and
-  live metrics when the local backend is running
+- **Playground** — the full RAG run, end to end and local: question → query
+  embedding → Qdrant top-K → context → prompt → Ollama → streamed answer →
+  validated source cards, with Prompt Inspector and Run Inspector
+- **Overview** — pipeline showing all eight stages as real, with live
+  metrics when the local backend is running
 - **Learn** — visual step-by-step explanation of how RAG works
 - **English / Spanish** — full UI translation, persisted, no reload
 - Light/dark themes, responsive layout, keyboard accessibility,
@@ -174,9 +192,12 @@ React  →  /api (Vite proxy)  →  FastAPI
                                    ├─ document services (extract/clean/chunk)
                                    ├─ embedding service ── BGE-M3 (local)
                                    ├─ vector store service ── Qdrant (Docker)
-                                   └─ retrieval service (embeds query via the
-                                      existing singleton, searches via the
-                                      existing store boundary)
+                                   ├─ retrieval service (query embed + top-K,
+                                   │   reusing the two above)
+                                   ├─ context / prompt services
+                                   └─ generation service ── Ollama (host)
+                                                              ↓
+                                                          local LLM
 ```
 
 ```text
@@ -184,24 +205,28 @@ React  →  /api (Vite proxy)  →  FastAPI
 │   ├── types/                  domain types
 │   ├── i18n/                   en.ts / es.ts / provider (typed keys)
 │   ├── services/               http · documentService · vectorStoreService
-│   ├── data/                   remaining mock data (playground, retrieval…)
+│   │                           · retrievalService · generationService
+│   ├── data/                   remaining demo data (seed queries, docs)
 │   ├── lib/  hooks/  theme/
 │   ├── components/             layout · ui · pipeline · documents · chunking
-│   │                           · embeddings · vectors · retrieval · …
-│   └── pages/                  incl. /vector-store and /documents/:id
+│   │                           · embeddings · vectors · retrieval · generation
+│   └── pages/                  incl. /vector-store, /retrieval, /playground
+│                               and /documents/:id
 └── backend/                    FastAPI (see backend/README.md)
     └── app/
-        ├── settings.py         model/collection/ports — defined once
+        ├── settings.py         model/collection/ports/budgets — defined once
         ├── api/                documents · embeddings · vectors · retrieval
+        │                       · llm · generation
         └── services/           extraction · cleaning · chunking · document
                                 · embedding · vector_store (Qdrant lives here)
-                                · retrieval (search + projected query space)
+                                · retrieval · context · prompt
+                                · ollama_service (Ollama lives here) · generation
 ```
 
 Boundaries matter: `document_service` never imports Qdrant, `embedding_service`
-owns the model, **only** `vector_store_service` talks to Qdrant, and
-`retrieval_service` reuses those two without duplicating any of them. Phase 5
-(context assembly + Ollama) plugs into the same seams.
+owns the model, **only** `vector_store_service` talks to Qdrant, **only**
+`ollama_service` talks to Ollama, and `generation_service` is the one place
+that orchestrates retrieval → context → prompt → LLM.
 
 ## Roadmap
 
@@ -223,16 +248,39 @@ owns the model, **only** `vector_store_service` talks to Qdrant, and
 - [x] Semantic retrieval
 - [x] Top-K search
 - [x] Query similarity
+- [x] Ollama integration
+- [x] Real RAG generation
+- [x] Source citations
 
-- [ ] Ollama integration
-- [ ] Real RAG generation
-- [ ] Source citations
 - [ ] RAG vs No-RAG
 - [ ] Evaluation
 
 ## Local Development
 
-Requires Node.js 20+, Python 3.11+ and Docker (for Qdrant).
+Requires Node.js 20+, Python 3.11+, Docker (for Qdrant) and Ollama (for
+generation).
+
+### First-time Ollama setup
+
+1. Install Ollama natively for your OS (https://ollama.com/download).
+   It runs as a local process with direct GPU access when a GPU exists —
+   that's why it is **not** forced into Docker here.
+2. Start the server: `ollama serve` (the desktop app does this for you).
+3. Pull the model you intend to use, explicitly — RAG Inspector never
+   downloads models for you:
+   ```bash
+   ollama pull qwen3:8b
+   ```
+   (Change the default with `OLLAMA_MODEL=<name>` after pulling.)
+
+Model size and generation speed depend entirely on your hardware; qwen3:8b
+runs on CPU but slowly. RAM is the hard constraint: BGE-M3 (~2.5 GB) and an
+8B LLM (~5.5 GB) resident at once need a comfortable 16 GB+ headroom — on a
+tighter machine point `OLLAMA_MODEL` (or the Playground model selector) at a
+smaller model, e.g. `qwen3:4b`. On CPU, Ollama's "thinking" mode is disabled
+by default (`RAG_LLM_THINKING=1` enables it) to keep first runs usable.
+
+### Run everything
 
 ```bash
 # 1. Vector store
@@ -250,6 +298,18 @@ npm install
 npm run dev
 ```
 
+### Optional configuration (env, all defaulted in `backend/app/settings.py`)
+
+| Variable | Default |
+|---|---|
+| `OLLAMA_BASE_URL` | `http://127.0.0.1:11434` |
+| `OLLAMA_MODEL` | `qwen3:8b` |
+| `OLLAMA_TIMEOUT_SECONDS` | `600` |
+| `RAG_LLM_THINKING` | off |
+| `RAG_MAX_CONTEXT_TOKENS` | `4000` |
+| `RAG_DEFAULT_TEMPERATURE` | `0.2` |
+| `RAG_SYSTEM_PROMPT` | built-in (anti-hallucination + citation rules) |
+
 First document ingestion after startup loads BGE-M3 once (the model weights
 are downloaded to the Hugging Face cache the first time, then reused).
 
@@ -257,6 +317,8 @@ Try it immediately with the fictional sample: `examples/sample-handbook.txt`.
 
 With the backend offline, Documents shows demo data and says so. With Qdrant
 offline, ingestion still works and indexing is marked failed — with retry.
+With Ollama offline, generation fails loudly with a clear explanation —
+never a mocked answer.
 
 ## Tech Stack
 
@@ -264,8 +326,10 @@ offline, ingestion still works and indexing is marked failed — with retry.
 - Vite · Tailwind CSS v4 · React Router v7 · Lucide icons
 - FastAPI + PyMuPDF + python-docx
 - sentence-transformers (BAAI/bge-m3, local CPU/CUDA) + Qdrant (Docker)
+- Ollama (native local process) for generation, streamed as NDJSON
 - Server-side PCA with NumPy · hand-rolled SVG scatter (no chart library)
-- pytest (unit tests run hermetically: fake embedder + in-process Qdrant)
+- pytest (unit tests run hermetically: fake embedder + in-process Qdrant +
+  fake Ollama)
 
 No UI kit, no animation library, no state manager, no chart dependency.
 Intentionally.

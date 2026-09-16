@@ -10,11 +10,15 @@ from fastapi.testclient import TestClient
 
 # Phase 3 services must run hermetically in tests: fake deterministic
 # embedder + in-process Qdrant. Set before app modules read settings.
+# Ollama points at a closed port — generation tests monkeypatch the
+# service layer, nothing ever talks to a real LLM.
 import os
 
 os.environ["RAG_INSPECTOR_EMBEDDING_BACKEND"] = "fake"
 os.environ["RAG_INSPECTOR_QDRANT_URL"] = ":memory:"
 os.environ["RAG_INSPECTOR_FAKE_EMBEDDING_DIMS"] = "16"
+os.environ["OLLAMA_BASE_URL"] = "http://127.0.0.1:9"
+os.environ["OLLAMA_MODEL"] = "fake-model:test"
 
 from app import settings  # noqa: E402
 from app.services import embedding_service, vector_store_service  # noqa: E402

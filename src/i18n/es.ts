@@ -103,6 +103,12 @@ export const es: TranslationDictionary = {
   "pipeline.stages.question.label": "Pregunta",
   "pipeline.stages.question.description":
     "Hacés una pregunta sobre tu base de conocimiento.",
+  "pipeline.stages.prompt.label": "Prompt",
+  "pipeline.stages.prompt.description":
+    "El contexto y la pregunta se ensamblan en el prompt exacto que recibe el modelo — completamente inspeccionable.",
+  "pipeline.stages.sources.label": "Fuentes",
+  "pipeline.stages.sources.description":
+    "Las citas en la respuesta apuntan a los chunks específicos de los que salieron.",
 
   "playground.title": "Playground",
   "playground.description":
@@ -114,10 +120,8 @@ export const es: TranslationDictionary = {
   "playground.running": "Ejecutando…",
   "playground.empty.title": "RAG no debería ser una caja negra.",
   "playground.empty.body":
-    "Ejecutá una pregunta y mirá cómo viaja por embedding, recuperación, contexto y generación.",
+    "Ejecutá una pregunta y mirá cómo viaja por embedding, recuperación, contexto, prompt y generación local.",
   "playground.run.title": "Ejecución del pipeline",
-  "playground.processing": "Procesando",
-  "playground.processingHint": "Recuperando contexto y generando…",
   "playground.questionEcho": "P: {question}",
 
   "retrieval.title": "Retrieval Inspector",
@@ -505,16 +509,92 @@ export const es: TranslationDictionary = {
   "retrieval.stage.embedding": "Generando embedding con BGE-M3…",
   "retrieval.stage.searching": "Buscando en Qdrant…",
 
-  "playground.retrievalComplete": "Recuperación completa",
-  "playground.chunksRetrieved": "{count} chunks recuperados",
-  "playground.topResult": "Mejor resultado",
-  "playground.contextTitle": "Contexto recuperado",
-  "playground.llmPendingTitle": "Generación LLM — Fase 5",
-  "playground.llmPendingBody":
-    "La generación de respuestas todavía no está implementada, a propósito. El pipeline se detiene acá, en el contexto recuperado real.",
-  "playground.answerPhase5": "Respuesta — Fase 5",
-  "playground.noCorpus.title": "No hay documentos indexados",
-  "playground.noCorpus.body":
-    "Primero subí un documento para que la búsqueda tenga qué buscar.",
-  "playground.retrievalError": "La búsqueda falló:"
+  "playground.retrievalError": "La ejecución falló:",
+
+  "playground.localLlmReady": "LLM local listo",
+  "playground.localLlmUnavailable": "LLM LOCAL NO DISPONIBLE",
+  "playground.llmUnavailableBody":
+    "Ollama no está accesible o el modelo configurado no está instalado.",
+  "playground.llmHint": "Inicielo con: ollama serve — y después: ollama pull {model}",
+  "playground.modelNotInstalled":
+    "El modelo “{model}” no está instalado localmente. Ejecutá: ollama pull {model}",
+  "playground.model": "Modelo",
+  "playground.modelDefault": "Predeterminado configurado",
+  "playground.temperature": "Temperatura",
+  "playground.temperatureInfo":
+    "Controla cuánta variación tiene el texto del modelo. No controla la veracidad.",
+  "playground.generating": "Generando con {model}…",
+  "playground.stop": "Detener",
+  "playground.llmChip": "LLM LOCAL · Ollama",
+
+  "playground.answer.title": "Respuesta",
+  "playground.answer.groundingNote":
+    "Esta respuesta fue generada usando el contexto recuperado que se muestra abajo.",
+  "playground.answer.noCitation":
+    "No se detectó ninguna cita de fuente explícita en esta respuesta.",
+  "playground.answer.empty": "El modelo no devolvió una respuesta.",
+  "playground.sources.title": "Fuentes",
+  "playground.sources.verified": "Fuente verificada",
+  "playground.sources.unresolvedTitle": "Cita sin resolver",
+  "playground.sources.unresolvedBody":
+    "El modelo citó {numbers} — identificadores que no existen en el contexto de esta ejecución. Se muestran pero no se tratan como fuentes reales.",
+  "playground.sources.open": "Abrir chunk",
+  "playground.prompt.title": "Prompt Inspector",
+  "playground.prompt.description":
+    "El texto exacto que se envió a Ollama en esta ejecución — no un ejemplo.",
+  "playground.prompt.system": "Instrucciones del sistema",
+  "playground.prompt.context": "Contexto",
+  "playground.prompt.user": "Pregunta del usuario",
+  "playground.prompt.view": "Ver el prompt real",
+  "playground.prompt.hide": "Ocultar prompt",
+  "playground.runInspector.title": "Run Inspector",
+  "playground.run.query": "Pregunta",
+  "playground.run.retrieval": "Recuperación",
+  "playground.run.topK": "Top K",
+  "playground.run.results": "Resultados",
+  "playground.run.corpus": "Chunks indexados",
+  "playground.run.retrievalTime": "Tiempo de recuperación",
+  "playground.run.context": "Contexto",
+  "playground.run.retrieved": "Chunks recuperados",
+  "playground.run.included": "Chunks incluidos",
+  "playground.run.estimated": "Tokens estimados",
+  "playground.run.prompt": "Prompt",
+  "playground.run.model": "Modelo",
+  "playground.run.temperature": "Temperatura",
+  "playground.run.generation": "Generación",
+  "playground.run.generationTime": "Tiempo de generación",
+  "playground.run.completionTokens": "Tokens de salida",
+  "playground.run.promptTokens": "Tokens de prompt",
+  "playground.run.tokensPerSecond": "Tokens / segundo",
+  "playground.run.notReported": "Ollama no lo reportó",
+  "playground.run.ms": "{ms} ms",
+  "playground.run.s": "{s} s",
+  "playground.ragVsGen.title": "Recuperación vs generación",
+  "playground.ragVsGen.body":
+    "La recuperación responde qué chunks son relevantes — matemática sobre vectores. La generación responde cómo redactar la respuesta — el LLM local la escribe. Son pasos separados, con modos de fallo separados.",
+  "playground.noDocuments.title": "No hay documentos indexados.",
+  "playground.noDocuments.body":
+    "Subí e indexá un documento antes de ejecutar RAG.",
+
+  "retrieval.useInPlayground": "Usar en Playground",
+
+  "error.llm_unavailable.title": "LLM local no disponible",
+  "error.llm_unavailable.body":
+    "Ollama no responde en la URL configurada.",
+  "error.llm_model_not_found.title": "Modelo no instalado",
+  "error.llm_model_not_found.body":
+    "El modelo no está disponible localmente. Descargalo con ollama pull — RAG Inspector nunca descarga modelos por vos.",
+  "error.llm_timeout.title": "La generación agotó el tiempo",
+  "error.llm_timeout.body":
+    "Ollama superó el tiempo máximo configurado. Probá con un modelo más chico o un contexto más corto.",
+  "error.generation_failed.title": "La generación falló",
+  "error.generation_failed.body":
+    "Ollama devolvió un error durante la generación.",
+  "error.no_indexed_documents.title": "No hay documentos indexados.",
+  "error.no_indexed_documents.body":
+    "Subí e indexá un documento antes de ejecutar RAG.",
+  "error.invalid_temperature.title": "Temperatura inválida",
+  "error.invalid_temperature.body": "La temperatura debe estar entre 0 y 2.",
+  "error.cancelled.title": "Generación detenida",
+  "error.cancelled.body": "Cancelaste esta ejecución."
 };

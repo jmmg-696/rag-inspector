@@ -101,6 +101,12 @@ export const en = {
   "pipeline.stages.question.label": "Question",
   "pipeline.stages.question.description":
     "You ask something about your knowledge base.",
+  "pipeline.stages.prompt.label": "Prompt",
+  "pipeline.stages.prompt.description":
+    "The context and the question are assembled into the exact prompt sent to the model — fully inspectable.",
+  "pipeline.stages.sources.label": "Sources",
+  "pipeline.stages.sources.description":
+    "Citations in the answer point back to the specific chunks they came from.",
 
   "playground.title": "Playground",
   "playground.description":
@@ -112,10 +118,8 @@ export const en = {
   "playground.running": "Running…",
   "playground.empty.title": "RAG shouldn't be a black box.",
   "playground.empty.body":
-    "Run a question and watch it travel through embedding, retrieval, context and generation.",
+    "Run a question and watch it travel through embedding, retrieval, context, prompt and local generation.",
   "playground.run.title": "Pipeline run",
-  "playground.processing": "Processing",
-  "playground.processingHint": "Retrieving context and generating…",
   "playground.questionEcho": "Q: {question}",
 
   "retrieval.title": "Retrieval Inspector",
@@ -503,18 +507,94 @@ export const en = {
   "retrieval.stage.embedding": "Embedding query with BGE-M3…",
   "retrieval.stage.searching": "Searching Qdrant…",
 
-  "playground.retrievalComplete": "Retrieval complete",
-  "playground.chunksRetrieved": "{count} chunks retrieved",
-  "playground.topResult": "Top result",
-  "playground.contextTitle": "Retrieved context",
-  "playground.llmPendingTitle": "LLM generation — Phase 5",
-  "playground.llmPendingBody":
-    "Answer generation is intentionally not implemented yet. The pipeline stops here, at the real retrieved context.",
-  "playground.answerPhase5": "Answer — Phase 5",
-  "playground.noCorpus.title": "No indexed documents",
-  "playground.noCorpus.body":
-    "Upload a document first so retrieval has something to search.",
-  "playground.retrievalError": "The retrieval run failed:"
+  "playground.retrievalError": "The run failed:",
+
+  "playground.localLlmReady": "Local LLM ready",
+  "playground.localLlmUnavailable": "Local LLM unavailable",
+  "playground.llmUnavailableBody":
+    "Ollama is not reachable or the configured model is not installed.",
+  "playground.llmHint": "Start it with: ollama serve — then: ollama pull {model}",
+  "playground.modelNotInstalled":
+    "Model “{model}” is not installed locally. Run: ollama pull {model}",
+  "playground.model": "Model",
+  "playground.modelDefault": "Configured default",
+  "playground.temperature": "Temperature",
+  "playground.temperatureInfo":
+    "Controls how much the model varies its wording. It does not control factuality.",
+  "playground.generating": "Generating with {model}…",
+  "playground.stop": "Stop",
+  "playground.llmChip": "LOCAL LLM · Ollama",
+
+  "playground.answer.title": "Answer",
+  "playground.answer.groundingNote":
+    "This answer was generated using the retrieved context shown below.",
+  "playground.answer.noCitation":
+    "No explicit source citation was detected in this answer.",
+  "playground.answer.empty": "The model did not return an answer.",
+  "playground.sources.title": "Sources",
+  "playground.sources.verified": "Verified source",
+  "playground.sources.unresolvedTitle": "Unresolved citation",
+  "playground.sources.unresolvedBody":
+    "The model cited {numbers} — identifiers that do not exist in this run's context. They are shown but not treated as real sources.",
+  "playground.sources.open": "Open chunk",
+  "playground.prompt.title": "Prompt Inspector",
+  "playground.prompt.description":
+    "The exact text sent to Ollama for this run — not an example.",
+  "playground.prompt.system": "System instructions",
+  "playground.prompt.context": "Context",
+  "playground.prompt.user": "User question",
+  "playground.prompt.view": "Show actual prompt",
+  "playground.prompt.hide": "Hide prompt",
+  "playground.runInspector.title": "Run Inspector",
+  "playground.run.query": "Question",
+  "playground.run.retrieval": "Retrieval",
+  "playground.run.topK": "Top K",
+  "playground.run.results": "Results",
+  "playground.run.corpus": "Indexed chunks",
+  "playground.run.retrievalTime": "Retrieval time",
+  "playground.run.context": "Context",
+  "playground.run.retrieved": "Retrieved chunks",
+  "playground.run.included": "Included chunks",
+  "playground.run.estimated": "Estimated tokens",
+  "playground.run.prompt": "Prompt",
+  "playground.run.model": "Model",
+  "playground.run.temperature": "Temperature",
+  "playground.run.generation": "Generation",
+  "playground.run.generationTime": "Generation time",
+  "playground.run.completionTokens": "Completion tokens",
+  "playground.run.promptTokens": "Prompt tokens",
+  "playground.run.tokensPerSecond": "Tokens / second",
+  "playground.run.notReported": "not reported by Ollama",
+  "playground.run.ms": "{ms} ms",
+  "playground.run.s": "{s} s",
+  "playground.ragVsGen.title": "Retrieval vs generation",
+  "playground.ragVsGen.body":
+    "Retrieval answers which chunks are relevant — mathematics over vectors. Generation answers how to phrase the answer — the local LLM writes it. They are separate steps, with separate failure modes.",
+  "playground.noDocuments.title": "No indexed documents available.",
+  "playground.noDocuments.body":
+    "Upload and index a document before running RAG.",
+
+  "retrieval.useInPlayground": "Use in Playground",
+
+  "error.llm_unavailable.title": "Local LLM unavailable",
+  "error.llm_unavailable.body":
+    "Ollama is not reachable at the configured URL.",
+  "error.llm_model_not_found.title": "Model not installed",
+  "error.llm_model_not_found.body":
+    "The model is not available locally. Pull it with ollama pull — RAG Inspector never downloads models for you.",
+  "error.llm_timeout.title": "Generation timed out",
+  "error.llm_timeout.body":
+    "Ollama exceeded the configured timeout. Try a smaller model or a shorter context.",
+  "error.generation_failed.title": "Generation failed",
+  "error.generation_failed.body":
+    "Ollama reported an error while generating.",
+  "error.no_indexed_documents.title": "No indexed documents available.",
+  "error.no_indexed_documents.body":
+    "Upload and index a document before running RAG.",
+  "error.invalid_temperature.title": "Invalid temperature",
+  "error.invalid_temperature.body": "Temperature must be between 0 and 2.",
+  "error.cancelled.title": "Generation stopped",
+  "error.cancelled.body": "You cancelled this run."
 } as const;
 
 export type TranslationKey = keyof typeof en;

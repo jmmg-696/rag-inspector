@@ -36,4 +36,27 @@ POINT_ID_NAMESPACE = "6f9d1a2c-5c53-4b6e-9a11-7c1b0f2e3d4c"
 VECTOR_PREVIEW_VALUES = 4
 SEMANTIC_SPACE_MAX_POINTS = 500
 
+# Phase 5 — local LLM via Ollama (host process, NOT a docker dependency).
+OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://127.0.0.1:11434")
+OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "qwen3:8b")
+# Generation budget in wall-clock seconds. CPU machines routinely need
+# minutes for a single local generation, so the default is generous;
+# lower it once a GPU makes generations fast.
+OLLAMA_TIMEOUT_SECONDS = float(os.environ.get("OLLAMA_TIMEOUT_SECONDS", "600"))
+OLLAMA_HEALTH_TIMEOUT_SECONDS = 3.0
+# Reasoning-mode toggle for thinking-capable models (qwen3). Disabled by
+# default so CPU demos stay responsive; set RAG_LLM_THINKING=1 to enable.
+OLLAMA_THINKING = os.environ.get("RAG_LLM_THINKING", "").lower() in {
+    "1",
+    "true",
+    "yes",
+}
+
+# Generation context budget, in approximated tokens (same 4 chars/token rule).
+RAG_MAX_CONTEXT_TOKENS = int(os.environ.get("RAG_MAX_CONTEXT_TOKENS", "4000"))
+DEFAULT_TEMPERATURE = float(os.environ.get("RAG_DEFAULT_TEMPERATURE", "0.2"))
+# Override with RAG_SYSTEM_PROMPT for experiments (kept honest: the UI always
+# shows the prompt that was actually sent).
+RAG_SYSTEM_PROMPT = os.environ.get("RAG_SYSTEM_PROMPT", "")
+
 __all__ = [name for name in globals() if name.isupper()]

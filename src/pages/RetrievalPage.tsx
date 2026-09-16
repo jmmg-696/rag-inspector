@@ -9,7 +9,7 @@ import {
   ScanSearch,
 } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { PageHeader } from "../components/ui/PageHeader";
 import { Card } from "../components/ui/Card";
 import { StatusBadge } from "../components/ui/StatusBadge";
@@ -50,6 +50,7 @@ const flowStages: { key: string }[] = [
 
 export default function RetrievalPage() {
   const { t } = useI18n();
+  const navigate = useNavigate();
   const [query, setQuery] = useState(DEFAULT_QUERY);
   const [topK, setTopK] = useState(5);
   const [threshold, setThreshold] = useState(0);
@@ -450,7 +451,18 @@ export default function RetrievalPage() {
                 </div>
               )}
               <p className="text-xs leading-relaxed text-muted">
-                {t("retrieval.scoreIsNotConfidence")}
+                {t("retrieval.scoreIsNotConfidence")}{" "}
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigate("/playground", {
+                      state: { query: response.query },
+                    })
+                  }
+                  className="font-medium text-accent underline-offset-4 hover:underline"
+                >
+                  {t("retrieval.useInPlayground")} →
+                </button>
               </p>
             </div>
           </Card>

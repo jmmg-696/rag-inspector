@@ -8,11 +8,11 @@ deliberately not here yet.
 UPLOAD → EXTRACT → CLEAN → CHUNK → EMBED → INDEX → READY
 
 QUESTION → QUERY EMBEDDING (same BGE-M3) → QDRANT COSINE TOP-K → RANKED CHUNKS
+         → CONTEXT (budgeted, whole chunks) → PROMPT → OLLAMA → ANSWER → SOURCES
 ```
 
-No external AI APIs. The embedding model, the vector database and retrieval
-all run on your machine. Answer generation (Phase 5) is intentionally NOT
-here.
+No external AI APIs. The embedding model, the vector database, retrieval and
+the LLM (Ollama on the host) all run on your machine.
 
 ## Services (clear boundaries)
 
@@ -25,6 +25,10 @@ here.
 | `embedding_service` | loads BGE-M3 **once** (lazy singleton), encodes chunks and queries, exposes model metadata | sentence-transformers, torch |
 | `vector_store_service` | **the only** Qdrant client: collection, upsert, scroll, **cosine search**, delete, PCA | qdrant-client |
 | `retrieval_service` | question → query embedding (via the existing singleton) → Qdrant top-K → ranked results; also projects the query into the PCA space | embedding, vector store |
+| `context_service` | ranked chunks → `SOURCE_n` blocks packed whole into a token budget | — |
+| `prompt_service` | deterministic system rules + context + question → the exact prompt string sent to the LLM | settings |
+| `ollama_service` | **the only** Ollama client: status/models (never generates), blocking generate, NDJSON token streaming, real metrics only | httpx, Ollama |
+| `generation_service` | RAG orchestration: retrieval → context → prompt → Ollama, citation validation, per-stage timings | everything above |
 
 `app/settings.py` centralizes model name, collection, distance, ports and
 limits — nothing is hardcoded elsewhere.
@@ -125,10 +129,31 @@ curl -X POST http://localhost:8000/api/retrieval/search \
   -d '{"query": "How does the approval process work?", "topK": 3}'
 ```
 
+### LLM status
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/api/llm/status` | Ollama reachability, configured model, model availability, local model list (never generates, never pulls) |
+| GET | `/api/llm/models` | locally installed model names |
+
+### Generation
+
+| Method | Path | Purpose |
+|---|---|---|
+| POST | `/api/generation/generate` | `{query, topK, scoreThreshold, documentId?, model?, temperature?}` → full RAG run: retrieval + context + the exact prompt + answer + validated citations + real metrics |
+| POST | `/api/generation/stream` | same body; responds with NDJSON events — `stage` (retrieving → building_context → building_prompt → generating), `retrieval`, `token`, `result`, `error` — real stage transitions, cancellable |
+
+Citation policy: `[SOURCE_n]` markers in the answer are validated against
+the context. Valid ones surface as sources; unknown ones are reported as
+unresolved and never promoted. Generation never falls back to mocks; if
+Ollama or the model is missing the request fails with a stable code.
+
 Error codes: `unsupported_type`, `empty_document`, `invalid_file`,
 `too_large`, `invalid_settings`, `not_found`,
 `vector_store_unavailable`, `embedding_model_unavailable`,
-`embedding_failed`, `collection_mismatch`, `already_running`.
+`embedding_failed`, `collection_mismatch`, `already_running`,
+`llm_unavailable`, `llm_model_not_found`, `llm_timeout`,
+`generation_failed`, `no_indexed_documents`, `invalid_temperature`.
 
 ## Environment
 
@@ -140,6 +165,13 @@ Error codes: `unsupported_type`, `empty_document`, `invalid_file`,
 | `RAG_INSPECTOR_FAKE_EMBEDDING_DIMS` | `32` | fake vector size |
 | `RAG_INSPECTOR_QDRANT_URL` | `http://127.0.0.1:6333` | or `:memory:` in-process |
 | `RAG_INSPECTOR_QDRANT_COLLECTION` | `rag_inspector` | collection name |
+| `OLLAMA_BASE_URL` | `http://127.0.0.1:11434` | local Ollama server |
+| `OLLAMA_MODEL` | `qwen3:8b` | default generation model |
+| `OLLAMA_TIMEOUT_SECONDS` | `600` | generation timeout (CPU runs are slow) |
+| `RAG_LLM_THINKING` | off | enable reasoning-mode models (qwen3) |
+| `RAG_MAX_CONTEXT_TOKENS` | `4000` | whole-chunk context budget (estimated tokens) |
+| `RAG_DEFAULT_TEMPERATURE` | `0.2` | default sampling temperature (0–2) |
+| `RAG_SYSTEM_PROMPT` | built-in | override prompt rules (UI always shows what was sent) |
 
 ## Tests
 
@@ -148,19 +180,25 @@ cd backend
 .venv/Scripts/python.exe -m pytest
 ```
 
-Unit tests run **hermetically**: a fake deterministic embedder and an
-in-process (`:memory:`) Qdrant — no Docker, no model download, no network.
-The suite covers extraction per format, validation, chunk size/overlap and
-determinism, model metadata, preview determinism and point-id stability
-across versions, collection creation and dimension mismatch, upsert /
-scroll / retrieve / delete, document vector cleanup, full re-index
-idempotency, the extended health endpoint and the Qdrant-unavailable state,
-plus semantic retrieval: score ordering, Top-K limits, similarity
-thresholds, document filtering, empty corpus, validation bounds, embedding
-and store failure modes, and the projected query space.
+Unit tests run **hermetically**: a fake deterministic embedder, an
+in-process (`:memory:`) Qdrant and a fake Ollama (the service layer is
+monkeypatched; `OLLAMA_BASE_URL` points at a closed port) — no Docker, no
+model downloads, no network, no GPU. 77 tests cover extraction per format,
+validation, chunk size/overlap and determinism, model metadata, preview
+determinism and point-id stability across versions, collection creation and
+dimension mismatch, upsert / scroll / retrieve / delete, document vector
+cleanup, full re-index idempotency, the extended health endpoint and the
+Qdrant-unavailable state, semantic retrieval (score ordering, Top-K limits,
+similarity thresholds, document filtering, empty corpus, validation bounds,
+embedding and store failure modes, projected query space) and generation
+(context budget keeps whole chunks in rank order, source ids, prompt
+structure, citation validation with unresolved markers, end-to-end
+orchestration, NDJSON stream stage sequence and every LLM failure mode:
+unavailable, model missing, timeout, mid-stream failure).
 
 ## What comes next
 
-Phase 5: assemble the retrieved chunks into a prompt → generate locally with
-Ollama → citations. The retrieval API from Phase 4 and the payload schema on
-every vector are exactly the seams it plugs into.
+Phase 6+: evaluation — golden datasets, faithfulness/answer-relevance
+metrics as an explicitly labeled evaluation signal, and RAG vs No-RAG
+comparisons. The Phase 5 response schema (retrieval + context + prompt +
+citations + metrics per run) is already shaped for it.
