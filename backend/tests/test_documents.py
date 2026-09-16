@@ -25,7 +25,10 @@ class TestHealth:
     def test_health_ok(self, client):
         response = client.get("/api/health")
         assert response.status_code == 200
-        assert response.json()["status"] == "ok"
+        body = response.json()
+        assert body["api"] == "ok"
+        assert body["qdrant"] == "ok"
+        assert body["embedding_model"] == "ready"
 
 
 class TestExtraction:
@@ -37,9 +40,13 @@ class TestExtraction:
         assert body["pageCount"] == 1
         assert body["characters"] > 1000
         assert body["words"] > 100
-        assert body["status"] == "ready"
+        assert body["status"] in {"embedding", "ready"}
         assert body["chunkCount"] > 0
         assert body["cleaning"]["originalCharacters"] >= body["cleaning"]["cleanedCharacters"]
+        # BackgroundTasks complete before TestClient returns; poll detail.
+        detail = client.get(f"/api/documents/{body['id']}").json()
+        assert detail["status"] == "ready"
+        assert detail["embeddingCount"] == body["chunkCount"]
 
     def test_markdown_ingest(self, client):
         content = "# Handbook\n\n" + " ".join([LOREM_SENTENCE] * 80)

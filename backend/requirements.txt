@@ -3,5 +3,14 @@ uvicorn[standard]>=0.53,<1
 python-multipart>=0.0.32
 PyMuPDF>=1.28,<2
 python-docx>=1.2,<2
+qdrant-client>=1.19,<2
+sentence-transformers>=6,<7
+# torch resolves to the small CPU build via the PyTorch index below
+# (local +cpu versions are preferred over PyPI's CUDA-bundled wheels).
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+numpy>=2.5,<3
+
+# tests
 pytest>=9.1,<10
 httpx>=0.28,<1

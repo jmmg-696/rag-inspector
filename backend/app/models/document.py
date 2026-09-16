@@ -56,6 +56,11 @@ class StoredDocument:
     cleaning: CleaningStats = field(
         default_factory=lambda: CleaningStats(0, 0, 0)
     )
+    embedding_count: int = 0
+    embedding_version: str = ""
+    indexed_at: str = ""
+    error_code: str = ""
+    error_message: str = ""
 
     @property
     def full_text(self) -> str:
@@ -75,6 +80,11 @@ class StoredDocument:
             "chunk_overlap": self.chunk_overlap,
             "chunk_count": self.chunk_count,
             "cleaning": self.cleaning.to_dict(),
+            "embedding_count": self.embedding_count,
+            "embedding_version": self.embedding_version,
+            "indexed_at": self.indexed_at,
+            "error_code": self.error_code,
+            "error_message": self.error_message,
         }
 
     @staticmethod
@@ -95,4 +105,9 @@ class StoredDocument:
                 data.get("cleaning", {})
                 or {"original_characters": 0, "cleaned_characters": 0, "removed_artifacts": 0}
             ),
+            embedding_count=int(data.get("embedding_count", 0)),
+            embedding_version=str(data.get("embedding_version", "")),
+            indexed_at=str(data.get("indexed_at", "")),
+            error_code=str(data.get("error_code", "")),
+            error_message=str(data.get("error_message", "")),
         )

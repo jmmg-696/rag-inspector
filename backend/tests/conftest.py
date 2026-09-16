@@ -1,16 +1,33 @@
 from __future__ import annotations
 
 import io
+import uuid
 
 import pymupdf
 import pytest
 from docx import Document as DocxDocument
 from fastapi.testclient import TestClient
 
+# Phase 3 services must run hermetically in tests: fake deterministic
+# embedder + in-process Qdrant. Set before app modules read settings.
+import os
+
+os.environ["RAG_INSPECTOR_EMBEDDING_BACKEND"] = "fake"
+os.environ["RAG_INSPECTOR_QDRANT_URL"] = ":memory:"
+os.environ["RAG_INSPECTOR_FAKE_EMBEDDING_DIMS"] = "16"
+
+from app import settings  # noqa: E402
+from app.services import embedding_service, vector_store_service  # noqa: E402
+
 
 @pytest.fixture(autouse=True)
-def temp_data_dir(tmp_path, monkeypatch):
+def isolated_services(tmp_path, monkeypatch):
     monkeypatch.setenv("RAG_INSPECTOR_DATA_DIR", str(tmp_path / "documents"))
+    monkeypatch.setattr(settings, "QDRANT_COLLECTION", f"test_{uuid.uuid4().hex[:8]}")
+    vector_store_service.reset_client_for_tests()
+    embedding_service.reset_for_tests()
+    yield
+    vector_store_service.reset_client_for_tests()
 
 
 @pytest.fixture

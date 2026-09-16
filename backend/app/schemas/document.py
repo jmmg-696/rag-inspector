@@ -37,6 +37,11 @@ class DocumentSummaryOut(CamelModel):
     chunk_size: int
     chunk_overlap: int
     chunk_count: int
+    embedding_count: int = 0
+    embedding_version: str = ""
+    indexed_at: str = ""
+    error_code: str = ""
+    error_message: str = ""
     cleaning: CleaningOut
     created_at: str
 
