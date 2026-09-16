@@ -94,13 +94,13 @@ def list_points(limit: int = 100) -> VectorPointListOut:
 @router.get("/semantic-space", response_model=SemanticSpaceOut)
 def semantic_space() -> SemanticSpaceOut:
     try:
-        points = vector_store_service.semantic_space()
+        result = vector_store_service.semantic_space()
     except VectorStoreError as error:
         raise _store_error(error) from error
     return SemanticSpaceOut(
         method="PCA",
         dimensions=2,
-        points=[SpacePointOut(**point) for point in points],
+        points=[SpacePointOut(**point) for point in result["points"]],
     )
 
 

@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .api.documents import router as documents_router
 from .api.embeddings import router as embeddings_router
+from .api.retrieval import router as retrieval_router
 from .api.vectors import router as vectors_router
 from .services import embedding_service, vector_store_service
 
@@ -33,6 +34,7 @@ def create_app() -> FastAPI:
     app.include_router(documents_router)
     app.include_router(embeddings_router)
     app.include_router(vectors_router)
+    app.include_router(retrieval_router)
 
     @app.get("/api/health")
     def health() -> dict[str, str]:

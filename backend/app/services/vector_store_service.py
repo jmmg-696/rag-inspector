@@ -128,6 +128,43 @@ def count() -> int:
     return _guard(run)
 
 
+def search(
+    vector: list[float],
+    limit: int,
+    score_threshold: float | None = None,
+    document_id: str | None = None,
+) -> list[dict[str, Any]]:
+    """Cosine similarity search. Scores are REAL Qdrant similarities."""
+
+    def run() -> list[dict[str, Any]]:
+        client = get_client()
+        if not client.collection_exists(settings.QDRANT_COLLECTION):
+            return []
+        query_filter = None
+        if document_id:
+            query_filter = Filter(
+                must=[
+                    FieldCondition(
+                        key="document_id", match=MatchValue(value=document_id)
+                    )
+                ]
+            )
+        hits = client.query_points(
+            collection_name=settings.QDRANT_COLLECTION,
+            query=vector,
+            limit=limit,
+            score_threshold=score_threshold,
+            query_filter=query_filter,
+            with_payload=True,
+        ).points
+        return [
+            {"id": str(hit.id), "score": float(hit.score), **(hit.payload or {})}
+            for hit in hits
+        ]
+
+    return _guard(run)
+
+
 def scroll_points(limit: int = 100) -> list[dict[str, Any]]:
     def run() -> list[dict[str, Any]]:
         client = get_client()
@@ -207,55 +244,86 @@ def collection_info() -> dict[str, Any]:
     return _guard(run)
 
 
-def semantic_space(dimensions: int = 2) -> list[dict[str, Any]]:
-    """Project stored vectors to 2D with PCA (numpy)."""
+QUERY_POINT_ID = "__query__"
 
-    def run() -> list[dict[str, Any]]:
+
+def semantic_space(
+    query_vector: list[float] | None = None,
+    dimensions: int = 2,
+) -> dict[str, Any]:
+    """Project stored vectors (and optionally a query vector) to 2D with PCA.
+
+    Returns {"points": [...], "query": {x, y} | None}. The projection is a
+    visualization, not the real vector space — retrieval scores always come
+    from Qdrant itself, never from 2D distances.
+    """
+
+    def run() -> dict[str, Any]:
         import numpy as np
 
         client = get_client()
-        if not client.collection_exists(settings.QDRANT_COLLECTION):
-            return []
-        points, _ = client.scroll(
-            collection_name=settings.QDRANT_COLLECTION,
-            limit=settings.SEMANTIC_SPACE_MAX_POINTS,
-            with_payload=True,
-            with_vectors=True,
-        )
-        if not points:
-            return []
-        matrix = np.array(
-            [point.vector if isinstance(point.vector, list) else [] for point in points],
-            dtype=float,
-        )
+        rows: list[tuple[str, list[float], dict]] = []
+        if client.collection_exists(settings.QDRANT_COLLECTION):
+            points, _ = client.scroll(
+                collection_name=settings.QDRANT_COLLECTION,
+                limit=settings.SEMANTIC_SPACE_MAX_POINTS,
+                with_payload=True,
+                with_vectors=True,
+            )
+            rows = [
+                (
+                    str(point.id),
+                    point.vector if isinstance(point.vector, list) else [],
+                    point.payload or {},
+                )
+                for point in points
+            ]
+        if query_vector is not None:
+            rows.append((QUERY_POINT_ID, list(query_vector), {}))
+        if not rows:
+            return {"points": [], "query": None}
+
+        matrix = np.array([vector for _, vector, _ in rows], dtype=float)
         if matrix.ndim != 2 or matrix.shape[1] == 0:
-            return []
+            return {"points": [], "query": None}
         centered = matrix - matrix.mean(axis=0)
-        # PCA via SVD on the centered matrix.
         try:
             _, _, rotation = np.linalg.svd(centered, full_matrices=False)
             projected = centered @ rotation[:dimensions].T
         except np.linalg.LinAlgError:
             projected = np.zeros((matrix.shape[0], dimensions))
+        # With fewer points than requested dimensions there are fewer real
+        # principal components; pad the rest with zeros so indexing is safe.
+        if projected.shape[1] < dimensions:
+            pad = np.zeros((projected.shape[0], dimensions - projected.shape[1]))
+            projected = np.concatenate([projected, pad], axis=1)
         span = projected.max(axis=0) - projected.min(axis=0)
         span[span == 0] = 1.0
         normalized = (projected - projected.min(axis=0)) / span * 2.0 - 1.0
 
         space: list[dict[str, Any]] = []
-        for index, point in enumerate(points):
-            payload = point.payload or {}
+        query_point: dict[str, Any] | None = None
+        for index, (point_id, _, payload) in enumerate(rows):
+            entry = {
+                "x": round(float(normalized[index][0]), 4),
+                "y": round(float(normalized[index][1]), 4)
+                if dimensions > 1
+                else 0.0,
+            }
+            if point_id == QUERY_POINT_ID:
+                query_point = entry
+                continue
             space.append(
                 {
-                    "point_id": str(point.id),
-                    "x": round(float(normalized[index][0]), 4),
-                    "y": round(float(normalized[index][1]), 4) if dimensions > 1 else 0.0,
+                    "point_id": point_id,
+                    **entry,
                     "document_id": payload.get("document_id", ""),
                     "document_name": payload.get("document_name", ""),
                     "chunk_index": payload.get("chunk_index", index),
                     "page_start": payload.get("page_start", 0),
                 }
             )
-        return space
+        return {"points": space, "query": query_point}
 
     return _guard(run)
 
