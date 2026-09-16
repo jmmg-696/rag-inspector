@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { AppLayout } from "./components/layout/AppLayout";
+import { ScrollManager } from "./components/layout/ScrollManager";
 import { ThemeProvider } from "./theme/ThemeProvider";
 import DocumentsPage from "./pages/DocumentsPage";
 import EvaluationPage from "./pages/EvaluationPage";
@@ -13,6 +14,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <BrowserRouter>
+        <ScrollManager />
         <Routes>
           <Route element={<AppLayout />}>
             <Route index element={<OverviewPage />} />
