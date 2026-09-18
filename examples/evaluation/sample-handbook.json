@@ -1,0 +1,114 @@
+{
+  "name": "Sample Handbook",
+  "version": 1,
+  "document": "sample-handbook.txt",
+  "description": "Retrieval evaluation dataset built on examples/sample-handbook.txt, the fictional FIELDSTONE operations handbook shipped with RAG Inspector. Each case declares expected sources as stable text anchors: at evaluation time the anchors are resolved against the currently indexed chunks of the document, and every chunk containing an anchor counts as an expected source (chunk overlap duplicates included). Reference answers are provided for human inspection only — they are never auto-scored.",
+  "anchor_note": "An anchor is an exact substring of the cleaned document text. Expected sources = all indexed chunks containing it. An anchor that matches no chunk skips its case with a warning; it never silently scores as wrong.",
+  "cases": [
+    {
+      "id": "q01",
+      "question": "When does the approval process begin?",
+      "anchor": "The approval process begins when a requester submits a complete form",
+      "tags": ["procedure", "approval"],
+      "reference_answer": "It begins when a requester submits a complete form through the internal portal."
+    },
+    {
+      "id": "q02",
+      "question": "What information must a request form include to be complete?",
+      "anchor": "a description, an estimated cost when relevant, the responsible area, and a business reason",
+      "tags": ["procedure", "approval"],
+      "reference_answer": "A description, an estimated cost when relevant, the responsible area, and a business reason."
+    },
+    {
+      "id": "q03",
+      "question": "Who approves requests by default?",
+      "anchor": "Requests are approved by the manager of the responsible area",
+      "tags": ["responsibility", "approval"],
+      "reference_answer": "The manager of the responsible area, assigned by role rather than by name."
+    },
+    {
+      "id": "q04",
+      "question": "When does a request escalate to the department head?",
+      "anchor": "above the local budget threshold are escalated to the department head",
+      "tags": ["approval", "escalation"],
+      "reference_answer": "When it exceeds the local budget threshold, or when the only possible approver would be the requester."
+    },
+    {
+      "id": "q05",
+      "question": "Can an employee approve their own request?",
+      "anchor": "No one can approve their own request",
+      "tags": ["responsibility", "approval"],
+      "reference_answer": "No. If the only possible approver is the requester, the request is escalated one level up."
+    },
+    {
+      "id": "q06",
+      "question": "Under what conditions are delegated approvals allowed?",
+      "anchor": "Delegated approvals are allowed only in writing",
+      "tags": ["approval", "procedure"],
+      "reference_answer": "Only in writing, only for a limited period, and only to a person with equivalent or higher responsibility."
+    },
+    {
+      "id": "q07",
+      "question": "What is the target response time for a first review?",
+      "anchor": "The target response time for a first review is two business days",
+      "tags": ["frequency", "response times"],
+      "reference_answer": "Two business days."
+    },
+    {
+      "id": "q08",
+      "question": "What is the target time from submission to final approval?",
+      "anchor": "The target for final approval is five business days from submission",
+      "tags": ["frequency", "response times"],
+      "reference_answer": "Five business days from submission."
+    },
+    {
+      "id": "q09",
+      "question": "What happens to requests left untouched for too long?",
+      "anchor": "sit untouched for more than five business days are flagged as overdue",
+      "tags": ["procedure", "response times"],
+      "reference_answer": "They are flagged as overdue and appear in the weekly operations report."
+    },
+    {
+      "id": "q10",
+      "question": "Who is responsible for the health of the approval system itself?",
+      "anchor": "The operations team is responsible for the health of the approval system",
+      "tags": ["responsibility"],
+      "reference_answer": "The operations team, which also owns the weekly report and monthly audits of closed requests."
+    },
+    {
+      "id": "q11",
+      "question": "What must be updated within ten business days after approval?",
+      "anchor": "documentation must be updated within ten business days",
+      "tags": ["procedure", "approval", "frequency"],
+      "reference_answer": "Runbooks, access lists and diagrams, as applicable."
+    },
+    {
+      "id": "q12",
+      "question": "How often do access reviews happen?",
+      "anchor": "Access reviews happen quarterly",
+      "tags": ["frequency", "safety"],
+      "reference_answer": "Quarterly, regardless of how an access grant was approved."
+    },
+    {
+      "id": "q13",
+      "question": "What takes over when a request looks like a security incident?",
+      "anchor": "the incident runbook takes over immediately",
+      "tags": ["safety", "escalation"],
+      "reference_answer": "The incident runbook; security escalations are never blocked by budget limits or approval queues."
+    },
+    {
+      "id": "q14",
+      "question": "How quickly must the responsible area respond to a raised flag?",
+      "anchor": "one business day to respond to a flag",
+      "tags": ["frequency", "escalation"],
+      "reference_answer": "Within one business day."
+    },
+    {
+      "id": "q15",
+      "question": "How often is the handbook reviewed and how are changes announced?",
+      "anchor": "handbook is reviewed every six months",
+      "tags": ["frequency", "procedure"],
+      "reference_answer": "Every six months, with changes to the approval process announced at least two weeks before taking effect."
+    }
+  ]
+}

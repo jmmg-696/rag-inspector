@@ -16,6 +16,7 @@ Environment overrides (all optional):
 from __future__ import annotations
 
 import os
+from pathlib import Path
 
 EMBEDDING_MODEL_NAME = os.environ.get(
     "RAG_INSPECTOR_EMBEDDING_MODEL", "BAAI/bge-m3"
@@ -58,5 +59,13 @@ DEFAULT_TEMPERATURE = float(os.environ.get("RAG_DEFAULT_TEMPERATURE", "0.2"))
 # Override with RAG_SYSTEM_PROMPT for experiments (kept honest: the UI always
 # shows the prompt that was actually sent).
 RAG_SYSTEM_PROMPT = os.environ.get("RAG_SYSTEM_PROMPT", "")
+
+# Phase 6 — evaluation datasets (read-only JSON, human-editable).
+DEFAULT_EVAL_DIR = Path(__file__).resolve().parents[2] / "examples" / "evaluation"
+
+
+def evaluation_dir() -> "Path":
+    directory = Path(os.environ.get("RAG_INSPECTOR_EVAL_DIR", DEFAULT_EVAL_DIR))
+    return directory
 
 __all__ = [name for name in globals() if name.isupper()]
