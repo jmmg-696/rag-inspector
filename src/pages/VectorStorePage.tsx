@@ -261,7 +261,7 @@ export default function VectorStorePage() {
               <Card title={t("vectorStore.space.title")}>
                 <div className="space-y-4 px-5 py-5 sm:px-6">
                   {space && (
-                    <div className="h-72 sm:h-80">
+                    <div className="h-80 sm:h-96">
                       <SemanticSpace
                         space={space}
                         totalVectors={stats?.vectors ?? 0}

@@ -50,14 +50,14 @@ export function SemanticSpace({
   const retrievalMode = query !== null;
 
   return (
-    <div>
+    <div className="flex h-full min-h-64 flex-col">
       <svg
         viewBox="0 0 100 100"
         role="img"
         aria-label={t("vectorStore.space.title")}
         preserveAspectRatio="xMidYMid meet"
         onClick={() => onSelect(null)}
-        className="h-full w-full min-h-64"
+        className="min-h-0 w-full flex-1"
       >
         {/* frame + axes */}
         <rect
@@ -143,7 +143,7 @@ export function SemanticSpace({
           </text>
         )}
       </svg>
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+      <div className="mt-3 flex shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-1">
         <p className="min-h-4 font-mono text-[11px] text-muted">
           {point
             ? `${t("embeddings.chunkLabel", { index: point.chunkIndex })} · ${point.documentName} · ${t("detail.chunk.page", { page: point.pageStart })}${
