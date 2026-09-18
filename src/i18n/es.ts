@@ -132,32 +132,103 @@ export const es: TranslationDictionary = {
   "retrieval.rank": "Puesto {rank}",
 
   "evaluation.title": "Evaluación",
-  "evaluation.description": "Medí la calidad de tu pipeline RAG.",
-  "evaluation.badge": "Métricas de demo",
-  "evaluation.notice":
-    "Estas son métricas hipotéticas con datos simulados. Las evaluaciones reales (scoring estilo RAGAS, golden datasets) llegan con la integración del pipeline.",
-  "evaluation.metric.answer-relevance.label": "Relevancia de la respuesta",
-  "evaluation.metric.answer-relevance.description":
-    "¿La respuesta generada va al punto de la pregunta?",
-  "evaluation.metric.context-relevance.label": "Relevancia del contexto",
-  "evaluation.metric.context-relevance.description":
-    "¿Los chunks recuperados son relevantes para la pregunta?",
-  "evaluation.metric.faithfulness.label": "Fidelidad",
-  "evaluation.metric.faithfulness.description":
-    "¿Cada afirmación de la respuesta está respaldada por el contexto?",
-  "evaluation.metric.retrieval-precision.label": "Precisión de recuperación",
-  "evaluation.metric.retrieval-precision.description":
-    "¿Cuántos chunks recuperados se usaron realmente?",
-  "evaluation.runs.title": "Consultas evaluadas",
-  "evaluation.runs.description":
-    "{passed} de {total} preguntas pasaron todas las verificaciones en la última demo.",
-  "evaluation.table.expected": "Esperado",
-  "evaluation.table.retrieved": "Recuperado",
-  "evaluation.table.score": "Score",
-  "evaluation.table.status": "Estado",
-  "evaluation.status.pass": "OK",
-  "evaluation.status.warn": "Revisar",
-  "evaluation.status.fail": "Falló",
+  "evaluation.description":
+    "Medí qué tan bien tu RAG recupera lo que importa — con métricas transparentes y definidas.",
+  "evaluation.realBadge": "Evaluación real",
+  "evaluation.dataset": "Dataset de evaluación",
+  "evaluation.questionCount": "{count} preguntas",
+  "evaluation.anchorExplainer": "resueltos contra los chunks indexados actuales",
+  "evaluation.configuration": "Configuración",
+  "evaluation.topK": "Top K",
+  "evaluation.threshold": "Umbral de similitud",
+  "evaluation.thresholdInfo":
+    "Los resultados por debajo de este score no se devuelven como aciertos. Estos valores son configuraciones de experimento, no recomendaciones universales.",
+  "evaluation.run": "Ejecutar evaluación",
+  "evaluation.running": "Evaluando…",
+  "evaluation.stage.retrieving": "Evaluando recuperación…",
+  "evaluation.stage.generating":
+    "Generando respuestas por pregunta — en CPU puede tardar varios minutos…",
+  "evaluation.hardwareWarning":
+    "La evaluación con generación puede ser lenta en CPU y necesita RAM libre disponible.",
+  "evaluation.generateAnswers": "Generar respuestas con el LLM local",
+  "evaluation.generateInfo":
+    "Ejecuta todo el pipeline por pregunta (recuperación → contexto → prompt → Ollama). Está apagado por defecto: la generación tarda minutos en CPU y solo agrega señales de citas.",
+  "evaluation.question": "Pregunta",
+  "evaluation.skippedCase": "Salteada — ancla no resoluble",
+  "evaluation.skippedWarning": "Advertencias de evaluación — casos salteados",
+  "evaluation.relevant": "Relevante (esperado)",
+  "evaluation.notAnnotated": "No anotado como relevante",
+  "evaluation.noResult": "Sin resultado en este puesto",
+  "evaluation.matrixTitle": "Matriz de recuperación",
+  "evaluation.matrixHint":
+    "Cada puesto recuperado, comparado contra las fuentes esperadas del dataset.",
+  "evaluation.caseDetail": "Detalle del caso",
+  "evaluation.expectedSources": "Fuentes esperadas",
+  "evaluation.retrieved": "Recuperadas",
+  "evaluation.caseMetrics": "Métricas del caso",
+  "evaluation.rr": "Reciprocal rank",
+  "evaluation.openInRetrieval": "Abrir en Retrieval Inspector",
+  "evaluation.openInPlayground": "Abrir en Playground",
+  "evaluation.referenceAnswer": "Respuesta de referencia (para inspección humana)",
+  "evaluation.generatedAnswer": "Respuesta generada",
+  "evaluation.noCitations": "Sin citas detectadas",
+  "evaluation.tokensAndTime": "Tokens · tiempo",
+  "evaluation.hitRate": "Hit Rate",
+  "evaluation.recall": "Recall",
+  "evaluation.precision": "Precision",
+  "evaluation.hitRateDef":
+    "Proporción de preguntas evaluadas donde al menos una fuente esperada aparece en Top-K.",
+  "evaluation.recallDef":
+    "Proporción de las fuentes esperadas de cada pregunta que fueron recuperadas, promediada sobre las preguntas evaluadas.",
+  "evaluation.precisionDef":
+    "Fuentes esperadas dentro de los Top-K slots — siempre dividido K — promediado sobre las preguntas evaluadas.",
+  "evaluation.mrrDef":
+    "Promedio de 1/puesto de la primera fuente esperada; sin aciertos, esa pregunta puntúa 0.",
+  "evaluation.citationCoverage": "Cobertura de citas",
+  "evaluation.citationCoverageDef":
+    "Proporción de respuestas generadas con al menos una cita válida. No es prueba de corrección.",
+  "evaluation.validCitationRate": "Tasa de citas válidas",
+  "evaluation.validCitationRateDef":
+    "Citas válidas dividido por todas las citas detectadas en las respuestas.",
+  "evaluation.generatedAnswers": "Respuestas generadas",
+  "evaluation.failedAnswers": "{count} fallaron",
+  "evaluation.avgGenerationTime": "Tiempo promedio de generación",
+  "evaluation.experiments": "Comparación de experimentos",
+  "evaluation.noExperiments":
+    "Todavía no hay ejecuciones guardadas — cada evaluación completa aparece acá.",
+  "evaluation.removeRun": "Eliminar ejecución",
+  "evaluation.clearHistory": "Limpiar historial",
+  "evaluation.metric": "Métrica",
+  "evaluation.generation": "Generación",
+  "evaluation.experimentsDisclaimer":
+    "Mediciones descriptivas sobre tu hardware, dataset y ejecución locales — no un ranking.",
+  "evaluation.methodology.title": "Cómo funciona la evaluación",
+  "evaluation.methodology.step1":
+    "1. Las preguntas se cargan del dataset de evaluación en examples/evaluation/.",
+  "evaluation.methodology.step2":
+    "2. Cada pregunta se embeddings con BGE-M3 — el mismo modelo que indexó los chunks.",
+  "evaluation.methodology.step3":
+    "3. Qdrant devuelve los Top-K chunks más cercanos por similitud coseno.",
+  "evaluation.methodology.step4":
+    "4. Anclas de texto resuelven las fuentes esperadas contra el corpus indexado actual.",
+  "evaluation.methodology.step5":
+    "5. Las métricas de recuperación comparan esperado con recuperado — el dataset define relevancia; la similitud nunca la decide.",
+  "evaluation.methodology.step6":
+    "6. La generación opcional corre todo el pipeline por Ollama; las señales de citas describen referencias, no corrección.",
+  "evaluation.honestyTitle": "Lo que estas métricas no son",
+  "evaluation.honestyBody":
+    "Ninguna métrica acá es un score de calidad general. Hit Rate no es calidad de respuesta, MRR no es inteligencia del modelo, la cobertura de citas no es corrección fáctica, y un Top-K más alto no es automáticamente mejor RAG. Miden aspectos específicos — vos decidís cómo leer los tradeoffs.",
+  "evaluation.relevanceNote":
+    "Un chunk recuperado que no está anotado como relevante puede contener información útil igualmente — el dataset solo marca fuentes esperadas. Los casos salteados se excluyen de todas las métricas, nunca cuentan como fallos.",
+  "common.table.status": "Estado",
+  "error.evaluation_document_missing.title": "Falta el corpus de evaluación",
+  "error.evaluation_document_missing.body":
+    "El documento del dataset no está en el corpus indexado. Subilo e indexalo primero.",
+  "error.evaluation_no_resolvable_cases.title": "Sin casos resolubles",
+  "error.evaluation_no_resolvable_cases.body":
+    "Ninguna ancla del dataset pudo resolverse contra el corpus actual.",
+  "error.dataset_not_found.title": "Dataset no encontrado",
+  "error.dataset_not_found.body": "El archivo del dataset de evaluación no existe.",
 
   "documents.title": "Documentos",
   "documents.description":

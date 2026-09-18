@@ -130,32 +130,103 @@ export const en = {
   "retrieval.rank": "Rank {rank}",
 
   "evaluation.title": "Evaluation",
-  "evaluation.description": "Measure the quality of your RAG pipeline.",
-  "evaluation.badge": "Demo metrics",
-  "evaluation.notice":
-    "These are hypothetical quality metrics shown with mock data. Real evaluation runs (RAGAS-style scoring, golden datasets) arrive with the pipeline integration.",
-  "evaluation.metric.answer-relevance.label": "Answer Relevance",
-  "evaluation.metric.answer-relevance.description":
-    "Is the generated answer on-topic for the question?",
-  "evaluation.metric.context-relevance.label": "Context Relevance",
-  "evaluation.metric.context-relevance.description":
-    "Are the retrieved chunks relevant to the question?",
-  "evaluation.metric.faithfulness.label": "Faithfulness",
-  "evaluation.metric.faithfulness.description":
-    "Is every claim in the answer supported by the context?",
-  "evaluation.metric.retrieval-precision.label": "Retrieval Precision",
-  "evaluation.metric.retrieval-precision.description":
-    "How many retrieved chunks were actually used?",
-  "evaluation.runs.title": "Evaluated Queries",
-  "evaluation.runs.description":
-    "{passed} of {total} questions passed all checks in the last demo run.",
-  "evaluation.table.expected": "Expected",
-  "evaluation.table.retrieved": "Retrieved",
-  "evaluation.table.score": "Score",
-  "evaluation.table.status": "Status",
-  "evaluation.status.pass": "Pass",
-  "evaluation.status.warn": "Review",
-  "evaluation.status.fail": "Fail",
+  "evaluation.description":
+    "Measure how well your RAG retrieves what matters — with transparent, defined metrics.",
+  "evaluation.realBadge": "Real evaluation",
+  "evaluation.dataset": "Evaluation dataset",
+  "evaluation.questionCount": "{count} questions",
+  "evaluation.anchorExplainer": "resolved against currently indexed chunks",
+  "evaluation.configuration": "Configuration",
+  "evaluation.topK": "Top K",
+  "evaluation.threshold": "Similarity threshold",
+  "evaluation.thresholdInfo":
+    "Results below this score are not returned as hits. These presets are experiment configurations, not universal recommendations.",
+  "evaluation.run": "Run evaluation",
+  "evaluation.running": "Evaluating…",
+  "evaluation.stage.retrieving": "Evaluating retrieval…",
+  "evaluation.stage.generating":
+    "Generating answers per question — may take several minutes on CPU…",
+  "evaluation.hardwareWarning":
+    "Generation evaluation may be slow on CPU and needs enough free RAM.",
+  "evaluation.generateAnswers": "Generate answers with local LLM",
+  "evaluation.generateInfo":
+    "Runs the full pipeline per question (retrieval → context → prompt → Ollama). Off by default — generation takes minutes on CPU and only adds citation signals.",
+  "evaluation.question": "Question",
+  "evaluation.skippedCase": "Skipped — unresolvable anchor",
+  "evaluation.skippedWarning": "Evaluation warnings — skipped cases",
+  "evaluation.relevant": "Relevant (expected)",
+  "evaluation.notAnnotated": "Not annotated as relevant",
+  "evaluation.noResult": "No result at this rank",
+  "evaluation.matrixTitle": "Retrieval matrix",
+  "evaluation.matrixHint":
+    "Every retrieved rank, compared against the dataset's expected sources.",
+  "evaluation.caseDetail": "Case detail",
+  "evaluation.expectedSources": "Expected sources",
+  "evaluation.retrieved": "Retrieved",
+  "evaluation.caseMetrics": "Case metrics",
+  "evaluation.rr": "Reciprocal rank",
+  "evaluation.openInRetrieval": "Open in Retrieval Inspector",
+  "evaluation.openInPlayground": "Open in Playground",
+  "evaluation.referenceAnswer": "Reference answer (for human inspection)",
+  "evaluation.generatedAnswer": "Generated answer",
+  "evaluation.noCitations": "No citations detected",
+  "evaluation.tokensAndTime": "Tokens · time",
+  "evaluation.hitRate": "Hit Rate",
+  "evaluation.recall": "Recall",
+  "evaluation.precision": "Precision",
+  "evaluation.hitRateDef":
+    "Share of evaluated questions where at least one expected source appears in Top-K.",
+  "evaluation.recallDef":
+    "Share of each question's expected sources that were retrieved, averaged over evaluated questions.",
+  "evaluation.precisionDef":
+    "Expected sources among the Top-K slots — always divided by K — averaged over evaluated questions.",
+  "evaluation.mrrDef":
+    "Average of 1/rank of the first expected source; no relevant hit scores 0 for that question.",
+  "evaluation.citationCoverage": "Citation coverage",
+  "evaluation.citationCoverageDef":
+    "Share of generated answers with at least one valid citation. Not proof of correctness.",
+  "evaluation.validCitationRate": "Valid citation rate",
+  "evaluation.validCitationRateDef":
+    "Valid citations divided by all citations detected in the answers.",
+  "evaluation.generatedAnswers": "Generated answers",
+  "evaluation.failedAnswers": "{count} failed",
+  "evaluation.avgGenerationTime": "Avg generation time",
+  "evaluation.experiments": "Experiment comparison",
+  "evaluation.noExperiments":
+    "No saved runs yet — every completed evaluation appears here.",
+  "evaluation.removeRun": "Remove run",
+  "evaluation.clearHistory": "Clear history",
+  "evaluation.metric": "Metric",
+  "evaluation.generation": "Generation",
+  "evaluation.experimentsDisclaimer":
+    "Descriptive measurements on your local hardware, dataset and runtime — not a ranking.",
+  "evaluation.methodology.title": "How evaluation works",
+  "evaluation.methodology.step1":
+    "1. Questions are loaded from the evaluation dataset in examples/evaluation/.",
+  "evaluation.methodology.step2":
+    "2. Each question is embedded with BGE-M3 — the same model that indexed the chunks.",
+  "evaluation.methodology.step3":
+    "3. Qdrant returns the Top-K closest chunks by cosine similarity.",
+  "evaluation.methodology.step4":
+    "4. Text anchors resolve expected sources against the currently indexed corpus.",
+  "evaluation.methodology.step5":
+    "5. Retrieval metrics compare expected with retrieved sources — the dataset defines relevance, similarity never decides it.",
+  "evaluation.methodology.step6":
+    "6. Optional generation runs the full pipeline through Ollama; citation signals describe references, not correctness.",
+  "evaluation.honestyTitle": "What these metrics are not",
+  "evaluation.honestyBody":
+    "No metric here is an overall quality score. Hit Rate is not answer quality, MRR is not model intelligence, citation coverage is not factual correctness, and a higher Top-K is not automatically better RAG. They measure specific aspects — you decide how to read the tradeoffs.",
+  "evaluation.relevanceNote":
+    "A retrieved chunk that is not annotated as relevant may still contain useful information — the dataset only marks expected sources. Skipped cases are excluded from all scores, never counted as failures.",
+  "common.table.status": "Status",
+  "error.evaluation_document_missing.title": "Evaluation corpus missing",
+  "error.evaluation_document_missing.body":
+    "The dataset's document is not in the indexed corpus. Upload and index it first.",
+  "error.evaluation_no_resolvable_cases.title": "No resolvable cases",
+  "error.evaluation_no_resolvable_cases.body":
+    "None of the dataset anchors could be resolved against the current corpus.",
+  "error.dataset_not_found.title": "Dataset not found",
+  "error.dataset_not_found.body": "The evaluation dataset file does not exist.",
 
   "documents.title": "Documents",
   "documents.description":

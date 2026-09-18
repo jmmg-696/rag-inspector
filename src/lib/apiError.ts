@@ -81,6 +81,18 @@ const errorKeys: Record<string, { titleKey: TranslationKey; bodyKey: Translation
     titleKey: "error.cancelled.title",
     bodyKey: "error.cancelled.body",
   },
+  evaluation_document_missing: {
+    titleKey: "error.evaluation_document_missing.title",
+    bodyKey: "error.evaluation_document_missing.body",
+  },
+  evaluation_no_resolvable_cases: {
+    titleKey: "error.evaluation_no_resolvable_cases.title",
+    bodyKey: "error.evaluation_no_resolvable_cases.body",
+  },
+  dataset_not_found: {
+    titleKey: "error.dataset_not_found.title",
+    bodyKey: "error.dataset_not_found.body",
+  },
   unknown: {
     titleKey: "error.unknown.title",
     bodyKey: "error.unknown.body",

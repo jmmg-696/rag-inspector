@@ -43,7 +43,15 @@ export default function PlaygroundPage() {
   const { t } = useI18n();
   const location = useLocation();
   const stages = usePipelineStages(mockQueryPipelineStages);
-  const incoming = (location.state ?? null) as { query?: string } | null;
+  const incoming = (location.state ?? null) as {
+    query?: string;
+    topK?: number;
+    scoreThreshold?: number;
+  } | null;
+  const handoffTopK = incoming?.topK
+    ? Math.min(20, Math.max(1, incoming.topK))
+    : TOP_K;
+  const handoffThreshold = incoming?.scoreThreshold ?? 0;
 
   const [question, setQuestion] = useState(
     incoming?.query?.trim() || mockDefaultQuestion
@@ -135,8 +143,8 @@ export default function PlaygroundPage() {
     if (!question.trim()) return;
     runGeneration({
       query: question.trim(),
-      topK: TOP_K,
-      scoreThreshold: 0,
+      topK: handoffTopK,
+      scoreThreshold: handoffThreshold,
       documentId: null,
       model,
       temperature,

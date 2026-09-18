@@ -8,8 +8,8 @@ import {
   RefreshCw,
   ScanSearch,
 } from "lucide-react";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { PageHeader } from "../components/ui/PageHeader";
 import { Card } from "../components/ui/Card";
 import { StatusBadge } from "../components/ui/StatusBadge";
@@ -51,9 +51,17 @@ const flowStages: { key: string }[] = [
 export default function RetrievalPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
-  const [query, setQuery] = useState(DEFAULT_QUERY);
-  const [topK, setTopK] = useState(5);
-  const [threshold, setThreshold] = useState(0);
+  const location = useLocation();
+  const handoff = (location.state ?? null) as {
+    query?: string;
+    topK?: number;
+    scoreThreshold?: number;
+  } | null;
+  const [query, setQuery] = useState(handoff?.query ?? DEFAULT_QUERY);
+  const [topK, setTopK] = useState(
+    handoff?.topK ? Math.min(20, Math.max(1, handoff.topK)) : 5
+  );
+  const [threshold, setThreshold] = useState(handoff?.scoreThreshold ?? 0);
   const [documentId, setDocumentId] = useState("");
   const [documents, setDocuments] = useState<DocumentSummary[]>([]);
   const [model, setModel] = useState<EmbeddingModelMeta | null>(null);
@@ -131,6 +139,21 @@ export default function RetrievalPage() {
       .then((info) => setOnline(info !== null && info.api === "ok"))
       .catch(() => setOnline(false));
   };
+
+  const autoRunFired = useRef(false);
+  const handoffQuery = handoff?.query;
+  useEffect(() => {
+    if (!handoffQuery || autoRunFired.current || online === false) return;
+    autoRunFired.current = true;
+    const params: RetrievalParams = {
+      query: handoffQuery,
+      topK,
+      scoreThreshold: threshold,
+      documentId: null,
+    };
+    Promise.resolve().then(() => runSearch(params));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [handoffQuery, online, topK, threshold]);
 
   const modelLoadingFirst = phase === "searching" && model?.status !== "ready";
 

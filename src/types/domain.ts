@@ -204,6 +204,143 @@ export interface RetrievalSpace {
   query: { x: number; y: number } | null;
 }
 
+export interface EvalDatasetCase {
+  id: string;
+  question: string;
+  anchor: string;
+  tags: string[];
+  referenceAnswer: string;
+}
+
+export interface EvalDataset {
+  name: string;
+  version: number;
+  description: string;
+  document: string;
+  anchorNote: string;
+  totalCases: number;
+  cases: EvalDatasetCase[];
+}
+
+export interface EvalExpectedSource {
+  documentId: string;
+  chunkId: string;
+  chunkIndex: number;
+  pageStart: number;
+  estimatedTokens: number;
+}
+
+export interface EvalRetrievedItem {
+  rank: number;
+  score: number;
+  chunkId: string;
+  chunkIndex: number;
+  pageStart: number;
+  documentId: string;
+  documentName: string;
+  text: string;
+  relevant: boolean;
+}
+
+export interface EvalCaseMetrics {
+  hitAtK: boolean;
+  recallAtK: number;
+  precisionAtK: number;
+  reciprocalRank: number;
+  firstRelevantRank: number | null;
+}
+
+export interface EvalGenerationCase {
+  answer: string;
+  verifiedCitations: string[];
+  unresolvedCitations: number[];
+  totalCitationsDetected: number;
+  model: string;
+  metrics: GenerationMetrics | null;
+  errorCode: string | null;
+  errorMessage: string | null;
+}
+
+export interface EvalCaseResult {
+  questionId: string;
+  question: string;
+  tags: string[];
+  referenceAnswer: string;
+  skipped: boolean;
+  expectedSources: EvalExpectedSource[];
+  retrieved: EvalRetrievedItem[];
+  metrics: EvalCaseMetrics | null;
+  generation: EvalGenerationCase | null;
+}
+
+export interface EvalConfiguration {
+  topK: number;
+  scoreThreshold: number;
+  embeddingModel: string;
+  embeddingDimensions: number | null;
+  chunkSize: number;
+  chunkOverlap: number;
+  documentName: string;
+  generationEnabled: boolean;
+  llmModel: string | null;
+  temperature: number | null;
+}
+
+export interface EvalRetrievalMetrics {
+  hitRateAtK: number;
+  recallAtK: number;
+  precisionAtK: number;
+  mrr: number;
+}
+
+export interface EvalGenerationMetrics {
+  generatedAnswers: number;
+  failedAnswers: number;
+  citationCoverage: number | null;
+  validCitationRate: number | null;
+  avgAnswerCharacters: number | null;
+  avgGenerationMs: number | null;
+  avgCompletionTokens: number | null;
+  avgTokensPerSecond: number | null;
+}
+
+export interface EvalWarning {
+  questionId: string;
+  message: string;
+}
+
+export interface EvalRun {
+  runId: string;
+  createdAt: string;
+  dataset: {
+    name: string;
+    totalCases: number;
+    evaluatedCases: number;
+    skippedCases: number;
+  };
+  configuration: EvalConfiguration;
+  retrievalMetrics: EvalRetrievalMetrics;
+  generationMetrics: EvalGenerationMetrics | null;
+  warnings: EvalWarning[];
+  cases: EvalCaseResult[];
+}
+
+export interface EvalRunRecord {
+  runId: string;
+  createdAt: string;
+  datasetName: string;
+  evaluatedCases: number;
+  skippedCases: number;
+  topK: number;
+  scoreThreshold: number;
+  generationEnabled: boolean;
+  llmModel: string | null;
+  retrievalMetrics: EvalRetrievalMetrics;
+  citationCoverage: number | null;
+  validCitationRate: number | null;
+  generatedAnswers: number;
+}
+
 export interface LlmStatus {
   available: boolean;
   baseUrl: string;
@@ -323,24 +460,6 @@ export interface OverviewMetric {
   label: string;
   value: string;
   hint: string;
-}
-
-export interface EvalMetric {
-  id: string;
-  label: string;
-  value: number;
-  description: string;
-}
-
-export type EvalStatus = "pass" | "warn" | "fail";
-
-export interface EvalRun {
-  id: string;
-  question: string;
-  expected: string;
-  retrieved: string;
-  score: number;
-  status: EvalStatus;
 }
 
 export interface LearnSection {

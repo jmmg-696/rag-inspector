@@ -63,7 +63,7 @@ export function DocumentDetails({
         />
         <MetaItem label={t("nav.embeddings")} value={document.embedding} />
         <MetaItem
-          label={t("evaluation.table.status")}
+          label={t("common.table.status")}
           value={t(status.labelKey)}
         />
       </dl>

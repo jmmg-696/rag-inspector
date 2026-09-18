@@ -36,7 +36,7 @@ export function DocumentTable({
               {t("common.table.chunks")}
             </th>
             <th scope="col" className={`${th} w-32`}>
-              {t("evaluation.table.status")}
+              {t("common.table.status")}
             </th>
             <th scope="col" className={`${th} w-28`}>
               {t("common.table.added")}

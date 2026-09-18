@@ -45,7 +45,7 @@ export function RealDocumentTable({
               {t("common.embeddings")}
             </th>
             <th scope="col" className={`${th} w-40`}>
-              {t("evaluation.table.status")}
+              {t("common.table.status")}
             </th>
             <th scope="col" className={`${th} w-32`}>
               {t("common.table.added")}
