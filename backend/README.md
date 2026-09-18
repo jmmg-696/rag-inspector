@@ -1,14 +1,17 @@
 # RAG Inspector — Backend
 
-Local RAG pipeline services. Phases 2–4 are real (ingestion → chunking →
-embeddings → Qdrant → semantic retrieval); answer generation is
-deliberately not here yet.
+Local RAG pipeline services. Phases 2–6 are real (ingestion → chunking →
+embeddings → Qdrant → semantic retrieval → generation via Ollama →
+evaluation against a golden dataset).
 
 ```text
 UPLOAD → EXTRACT → CLEAN → CHUNK → EMBED → INDEX → READY
 
 QUESTION → QUERY EMBEDDING (same BGE-M3) → QDRANT COSINE TOP-K → RANKED CHUNKS
          → CONTEXT (budgeted, whole chunks) → PROMPT → OLLAMA → ANSWER → SOURCES
+
+GOLDEN DATASET → anchors resolved against indexed chunks → per-question run
+               → Hit Rate@K / Recall@K / Precision@K / MRR (+ citation metrics)
 ```
 
 No external AI APIs. The embedding model, the vector database, retrieval and
@@ -29,6 +32,7 @@ the LLM (Ollama on the host) all run on your machine.
 | `prompt_service` | deterministic system rules + context + question → the exact prompt string sent to the LLM | settings |
 | `ollama_service` | **the only** Ollama client: status/models (never generates), blocking generate, NDJSON token streaming, real metrics only | httpx, Ollama |
 | `generation_service` | RAG orchestration: retrieval → context → prompt → Ollama, citation validation, per-stage timings | everything above |
+| `evaluation_service` | **measurement only**: golden-dataset loading, anchor resolution against indexed chunks, per-case + aggregate IR metrics, optional generation evaluation — never a second pipeline | retrieval, generation, document |
 
 `app/settings.py` centralizes model name, collection, distance, ports and
 limits — nothing is hardcoded elsewhere.
@@ -148,12 +152,39 @@ the context. Valid ones surface as sources; unknown ones are reported as
 unresolved and never promoted. Generation never falls back to mocks; if
 Ollama or the model is missing the request fails with a stable code.
 
+### Evaluation
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/api/evaluation/dataset?name=` | dataset metadata + cases (anchors resolved at run time, never stored) |
+| GET | `/api/evaluation/datasets` | available dataset file names |
+| POST | `/api/evaluation/run` | `{topK (1–20), scoreThreshold (0–1), dataset?, generateAnswers?, model?, temperature?}` → run summary + per-case expected/retrieved/metrics + aggregates + warnings |
+
+Datasets are human-editable JSON files in `examples/evaluation/` (override
+with `RAG_INSPECTOR_EVAL_DIR`). Each case declares a question and a text
+**anchor**; at run time every indexed chunk of the dataset's document
+containing the anchor (whitespace-normalized) counts as an expected source.
+
+Ground-truth rules: relevance comes **only** from anchors — similarity
+scores never decide relevance, no LLM judges anything, and reference
+answers are never auto-scored. A case whose anchor resolves to no chunk is
+**skipped with a warning**, never scored as a failure. Metrics (exact
+definitions): Hit Rate@K = share of evaluated questions with ≥1 expected
+source in the top K; Recall@K = expected retrieved / expected, averaged;
+Precision@K = expected retrieved / K (always divided by K); MRR = average
+1/rank of the first expected source (0 when absent). Generation evaluation
+reuses `generation_service` per case and aggregates citation coverage,
+valid citation rate and only the timing/token stats Ollama really reports;
+per-case generation failures are captured as `error_code`, not raised.
+
 Error codes: `unsupported_type`, `empty_document`, `invalid_file`,
 `too_large`, `invalid_settings`, `not_found`,
 `vector_store_unavailable`, `embedding_model_unavailable`,
 `embedding_failed`, `collection_mismatch`, `already_running`,
 `llm_unavailable`, `llm_model_not_found`, `llm_timeout`,
-`generation_failed`, `no_indexed_documents`, `invalid_temperature`.
+`generation_failed`, `no_indexed_documents`, `invalid_temperature`,
+`dataset_not_found`, `dataset_invalid`, `evaluation_document_missing`,
+`evaluation_no_resolvable_cases`.
 
 ## Environment
 
@@ -172,6 +203,7 @@ Error codes: `unsupported_type`, `empty_document`, `invalid_file`,
 | `RAG_MAX_CONTEXT_TOKENS` | `4000` | whole-chunk context budget (estimated tokens) |
 | `RAG_DEFAULT_TEMPERATURE` | `0.2` | default sampling temperature (0–2) |
 | `RAG_SYSTEM_PROMPT` | built-in | override prompt rules (UI always shows what was sent) |
+| `RAG_INSPECTOR_EVAL_DIR` | `examples/evaluation` | golden-dataset JSON directory (read-only) |
 
 ## Tests
 
@@ -183,22 +215,27 @@ cd backend
 Unit tests run **hermetically**: a fake deterministic embedder, an
 in-process (`:memory:`) Qdrant and a fake Ollama (the service layer is
 monkeypatched; `OLLAMA_BASE_URL` points at a closed port) — no Docker, no
-model downloads, no network, no GPU. 77 tests cover extraction per format,
+model downloads, no network, no GPU. 97 tests cover extraction per format,
 validation, chunk size/overlap and determinism, model metadata, preview
 determinism and point-id stability across versions, collection creation and
 dimension mismatch, upsert / scroll / retrieve / delete, document vector
 cleanup, full re-index idempotency, the extended health endpoint and the
 Qdrant-unavailable state, semantic retrieval (score ordering, Top-K limits,
 similarity thresholds, document filtering, empty corpus, validation bounds,
-embedding and store failure modes, projected query space) and generation
+embedding and store failure modes, projected query space), generation
 (context budget keeps whole chunks in rank order, source ids, prompt
 structure, citation validation with unresolved markers, end-to-end
 orchestration, NDJSON stream stage sequence and every LLM failure mode:
-unavailable, model missing, timeout, mid-stream failure).
+unavailable, model missing, timeout, mid-stream failure) and evaluation
+(dataset validation, anchor resolution incl. overlap duplicates and
+whitespace normalization, exact metric math, relevance scoped by
+`(document_id, chunk_id)` — cross-document chunk-id collision regression —
+skipped-case flow, aggregate citation metrics with null handling,
+generation failure capture and API error mapping).
 
 ## What comes next
 
-Phase 6+: evaluation — golden datasets, faithfulness/answer-relevance
-metrics as an explicitly labeled evaluation signal, and RAG vs No-RAG
-comparisons. The Phase 5 response schema (retrieval + context + prompt +
-citations + metrics per run) is already shaped for it.
+Phase 7: RAG vs No-RAG — answering the same golden-dataset questions with
+and without retrieved context, side by side, with the same honesty rules.
+The evaluation run schema (per-case retrieval + generation + metrics) is
+already shaped for it.

@@ -17,25 +17,30 @@ out. The interesting part — the actual *retrieval* — is hidden.
 layers: **what happened** (the real numbers) and **why it matters** (the human
 explanation).
 
-As of **Phase 5**, the entire RAG pipeline runs locally and every step is
+As of **Phase 6**, the entire RAG pipeline runs locally and every step is
 inspectable: ingest a document, embed it with BGE-M3, retrieve with Qdrant
 cosine search, assemble a budgeted context, **see the exact prompt sent to
-the model**, generate an answer with a local LLM through **Ollama**, and
-follow validated `[SOURCE_n]` citations back to the chunks they came from.
+the model**, generate an answer with a local LLM through **Ollama**, follow
+validated `[SOURCE_n]` citations back to the chunks they came from — and
+**measure the whole thing** against a golden dataset with standard IR
+metrics.
 
 ```text
 Documents → Chunking → Embeddings → Vector Store → Retrieval → Context → Local LLM → Answer
   ● real      ● real      ● real        ● real        ● real      ● real     ● real      ● real
+
+Golden dataset → run each question through the same pipeline → measured metrics
+     ● real      (Hit Rate@K · Recall@K · Precision@K · MRR · citation coverage)
 ```
 
-What remains for later phases is *evaluation science*, not plumbing:
-RAG vs No-RAG comparisons and measured quality metrics.
+The plumbing is done. What remains is comparison science: RAG vs No-RAG
+answers on the same questions.
 
 No external AI APIs, no cloud services, no telemetry. By default, document
 content, embeddings, vectors and prompts never leave this machine — the
 processing path is Browser → local FastAPI → local BGE-M3 / Qdrant / Ollama.
 
-## Current Pipeline (Phase 5 — complete)
+## Current Pipeline (Phase 6 — complete)
 
 ```text
 DOCUMENT → EXTRACT → CLEAN → CHUNK → EMBEDDINGS → QDRANT
@@ -43,6 +48,10 @@ DOCUMENT → EXTRACT → CLEAN → CHUNK → EMBEDDINGS → QDRANT
 USER QUESTION → QUERY EMBEDDING → COSINE TOP-K → RETRIEVED CHUNKS
                                                       ↓
                                     CONTEXT → PROMPT → OLLAMA → ANSWER → SOURCES
+
+GOLDEN DATASET → anchors resolved against indexed chunks → per-question
+                 pipeline run → Hit Rate@K / Recall@K / Precision@K / MRR
+                 (+ citation metrics when generation is enabled)
 ```
 
 ## Local LLM generation
@@ -68,6 +77,47 @@ USER QUESTION → QUERY EMBEDDING → COSINE TOP-K → RETRIEVED CHUNKS
   citations*, never promoted to real sources
 - **Honest wording**: an answer is "generated using the retrieved context
   shown below" — grounding is never *claimed* as a guarantee
+
+## Evaluation
+
+Phase 6 measures the pipeline instead of trusting it. A **golden dataset**
+(`examples/evaluation/sample-handbook.json`, 15 questions over the shipped
+sample handbook) declares each expected source as a **stable text anchor** —
+an exact substring of the cleaned document. At run time anchors are resolved
+against the *currently indexed* chunks, so the dataset survives re-chunking
+with different settings.
+
+- **Relevance ground truth comes only from anchors.** Similarity scores
+  never decide relevance, and no LLM judges anything
+- **Retrieval metrics** (exact definitions): Hit Rate@K = share of questions
+  with ≥1 expected source in the top K · Recall@K = expected sources
+  retrieved / expected sources · Precision@K = expected sources retrieved /
+  K · MRR = average 1/rank of the first expected source
+- **Generation metrics** (optional, real Ollama runs): citation coverage
+  (answers with ≥1 verified citation), valid citation rate, and average
+  timing/token stats — only what Ollama actually reports
+- **Unresolvable anchors skip their case with a warning** — they are never
+  silently scored as failures
+- The UI shows a **question × rank matrix** (which rank position held a
+  relevant chunk), **per-case detail** (expected vs retrieved, scores,
+  answer + citations), an **experiment history** comparing runs across
+  Top-K / threshold / model, and the full **methodology**
+- Reference answers in the dataset are for human inspection only — never
+  auto-scored
+
+```jsonc
+// POST /api/evaluation/run
+{ "topK": 5, "scoreThreshold": 0, "generateAnswers": false }
+
+// →
+{
+  "runId": "eval-9f3a1c2d4e5f",
+  "retrievalMetrics": { "hitRateAtK": 1.0, "recallAtK": 0.8667,
+                        "precisionAtK": 0.3733, "mrr": 0.9333 },
+  "cases": [ { "questionId": "q01", "expectedSources": [...],
+               "retrieved": [...], "metrics": {...} } ]
+}
+```
 
 ## Semantic Retrieval
 
@@ -167,6 +217,10 @@ relationships, not the actual vector space.
 - **Playground** — the full RAG run, end to end and local: question → query
   embedding → Qdrant top-K → context → prompt → Ollama → streamed answer →
   validated source cards, with Prompt Inspector and Run Inspector
+- **Evaluation** — golden dataset with anchored ground truth: Hit Rate@K,
+  Recall@K, Precision@K and MRR from real Qdrant retrieval, optional
+  citation metrics from real Ollama generation, question × rank matrix,
+  per-case detail and experiment comparison history
 - **Overview** — pipeline showing all eight stages as real, with live
   metrics when the local backend is running
 - **Learn** — visual step-by-step explanation of how RAG works
@@ -184,6 +238,7 @@ relationships, not the actual vector space.
 | `public/screenshots/chunking.png` | Visual chunking explorer |
 | `public/screenshots/embeddings.png` | Vector heatmap |
 | `public/screenshots/semantic-space.png` | PCA semantic space |
+| `public/screenshots/evaluation.png` | Evaluation matrix and metrics |
 
 ## Architecture
 
@@ -206,27 +261,32 @@ React  →  /api (Vite proxy)  →  FastAPI
 │   ├── i18n/                   en.ts / es.ts / provider (typed keys)
 │   ├── services/               http · documentService · vectorStoreService
 │   │                           · retrievalService · generationService
+│   │                           · evaluationService
 │   ├── data/                   remaining demo data (seed queries, docs)
 │   ├── lib/  hooks/  theme/
 │   ├── components/             layout · ui · pipeline · documents · chunking
 │   │                           · embeddings · vectors · retrieval · generation
-│   └── pages/                  incl. /vector-store, /retrieval, /playground
-│                               and /documents/:id
+│   │                           · evaluation
+│   └── pages/                  incl. /vector-store, /retrieval, /playground,
+│                               /evaluation and /documents/:id
 └── backend/                    FastAPI (see backend/README.md)
     └── app/
         ├── settings.py         model/collection/ports/budgets — defined once
         ├── api/                documents · embeddings · vectors · retrieval
-        │                       · llm · generation
+        │                       · llm · generation · evaluation
         └── services/           extraction · cleaning · chunking · document
                                 · embedding · vector_store (Qdrant lives here)
                                 · retrieval · context · prompt
-                                · ollama_service (Ollama lives here) · generation
+                                · ollama_service (Ollama lives here)
+                                · generation · evaluation
 ```
 
 Boundaries matter: `document_service` never imports Qdrant, `embedding_service`
 owns the model, **only** `vector_store_service` talks to Qdrant, **only**
-`ollama_service` talks to Ollama, and `generation_service` is the one place
-that orchestrates retrieval → context → prompt → LLM.
+`ollama_service` talks to Ollama, `generation_service` is the one place
+that orchestrates retrieval → context → prompt → LLM, and
+`evaluation_service` **only measures** — it reuses retrieval and generation,
+it never duplicates them.
 
 ## Roadmap
 
@@ -251,9 +311,9 @@ that orchestrates retrieval → context → prompt → LLM.
 - [x] Ollama integration
 - [x] Real RAG generation
 - [x] Source citations
+- [x] Evaluation — golden dataset, IR metrics, citation metrics
 
 - [ ] RAG vs No-RAG
-- [ ] Evaluation
 
 ## Local Development
 
@@ -309,6 +369,7 @@ npm run dev
 | `RAG_MAX_CONTEXT_TOKENS` | `4000` |
 | `RAG_DEFAULT_TEMPERATURE` | `0.2` |
 | `RAG_SYSTEM_PROMPT` | built-in (anti-hallucination + citation rules) |
+| `RAG_INSPECTOR_EVAL_DIR` | `examples/evaluation` (golden-dataset JSONs) |
 
 First document ingestion after startup loads BGE-M3 once (the model weights
 are downloaded to the Hugging Face cache the first time, then reused).
