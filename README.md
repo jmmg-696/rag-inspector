@@ -230,15 +230,25 @@ relationships, not the actual vector space.
 
 ## Screenshots
 
-> Placeholders — real captures will land in `public/screenshots/`.
+### Overview — the whole pipeline, live
 
-| | |
-|---|---|
-| `public/screenshots/overview.png` | Overview with the RAG pipeline |
-| `public/screenshots/chunking.png` | Visual chunking explorer |
-| `public/screenshots/embeddings.png` | Vector heatmap |
-| `public/screenshots/semantic-space.png` | PCA semantic space |
-| `public/screenshots/evaluation.png` | Evaluation matrix and metrics |
+![Overview with the RAG pipeline](public/screenshots/overview.png)
+
+### Chunking explorer — watch a document split
+
+![Visual chunking explorer](public/screenshots/chunking.png)
+
+### Embeddings — every dimension of a real vector
+
+![Vector heatmap](public/screenshots/embeddings.png)
+
+### Semantic space — PCA projection of the corpus
+
+![PCA semantic space](public/screenshots/semantic-space.png)
+
+### Evaluation — measured, not trusted
+
+![Evaluation matrix and metrics](public/screenshots/evaluation.png)
 
 ## Architecture
 
