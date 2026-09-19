@@ -33,8 +33,8 @@ Golden dataset → run each question through the same pipeline → measured metr
      ● real      (Hit Rate@K · Recall@K · Precision@K · MRR · citation coverage)
 ```
 
-The plumbing is done. What remains is comparison science: RAG vs No-RAG
-answers on the same questions.
+The core pipeline is complete. Future experiments may explore how
+retrieval configurations affect the system.
 
 No external AI APIs, no cloud services, no telemetry. By default, document
 content, embeddings, vectors and prompts never leave this machine — the
@@ -322,8 +322,6 @@ it never duplicates them.
 - [x] Real RAG generation
 - [x] Source citations
 - [x] Evaluation — golden dataset, IR metrics, citation metrics
-
-- [ ] RAG vs No-RAG
 
 ## Local Development
 

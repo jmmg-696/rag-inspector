@@ -233,9 +233,9 @@ whitespace normalization, exact metric math, relevance scoped by
 skipped-case flow, aggregate citation metrics with null handling,
 generation failure capture and API error mapping).
 
-## What comes next
+## Scope
 
-Phase 7: RAG vs No-RAG — answering the same golden-dataset questions with
-and without retrieved context, side by side, with the same honesty rules.
-The evaluation run schema (per-case retrieval + generation + metrics) is
-already shaped for it.
+The backend is feature-complete through Phase 6. The evaluation run schema
+(per-case retrieval + generation + metrics) is intentionally generic:
+future experiments — alternative datasets, different retrieval
+configurations — plug into it without new plumbing.
