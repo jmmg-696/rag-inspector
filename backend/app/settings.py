@@ -18,6 +18,15 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+# Optional local convenience: backend/.env (see .env.example). Real
+# environment variables always win; tests set env before this import.
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=False)
+except ImportError:
+    pass
+
 EMBEDDING_MODEL_NAME = os.environ.get(
     "RAG_INSPECTOR_EMBEDDING_MODEL", "BAAI/bge-m3"
 )

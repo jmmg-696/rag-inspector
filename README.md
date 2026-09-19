@@ -33,8 +33,9 @@ Golden dataset → run each question through the same pipeline → measured metr
      ● real      (Hit Rate@K · Recall@K · Precision@K · MRR · citation coverage)
 ```
 
-The core pipeline is complete. Future experiments may explore how
-retrieval configurations affect the system.
+The core pipeline is complete. Future experiments may explore how retrieval
+configurations affect the system; comparing RAG with a separate no-RAG baseline
+is intentionally outside the current release scope.
 
 No external AI APIs, no cloud services, no telemetry. By default, document
 content, embeddings, vectors and prompts never leave this machine — the
@@ -54,12 +55,24 @@ GOLDEN DATASET → anchors resolved against indexed chunks → per-question
                  (+ citation metrics when generation is enabled)
 ```
 
+## RAG vs no-RAG
+
+**RAG** means the model receives context retrieved from the indexed documents
+before it writes an answer. This project exposes that path end to end:
+question -> query embedding -> Qdrant top-K -> context -> prompt -> local LLM.
+
+**No-RAG** means asking the model to answer without retrieved document
+context. RAG Inspector does not present a no-RAG mode as a completed feature,
+so it never implies that its answers are proven correct or that retrieval alone
+guarantees grounding. The Playground shows the exact retrieved context,
+prompt, answer, and validated citations so the RAG path can be inspected.
+
 ## Local LLM generation
 
 - **Ollama** (running as a native local process — not forced into Docker,
   so GPU setups work naturally) with a **configurable model**:
   `OLLAMA_MODEL=qwen3:8b` by default, any locally installed model works
-  (`qwen3:4b` recommended on 16 GB RAM machines — see Local Development)
+  (`qwen3:4b` recommended on 16 GB RAM machines — see Quick Start)
 - The generation API owns the full orchestration: retrieval → context →
   prompt → Ollama. The frontend never stitches these steps together itself
 - **Context budget**: whole chunks are packed in rank order up to
@@ -251,7 +264,13 @@ relationships, not the actual vector space.
 
 ![Evaluation matrix and metrics](public/screenshots/evaluation.png)
 
+### Playground flow
+
+![Animated Playground flow](public/screenshots/playground-flow.gif)
+
 ## Architecture
+
+![RAG Inspector local architecture](public/architecture.svg)
 
 ```text
 React  →  /api (Vite proxy)  →  FastAPI
@@ -324,18 +343,26 @@ it never duplicates them.
 - [x] Source citations
 - [x] Evaluation — golden dataset, IR metrics, citation metrics
 
-## Local Development
+## Quick Start
 
-Requires Node.js 20+, Python 3.11+, Docker (for Qdrant) and Ollama (for
-generation).
+For a clean machine, install Node.js 20+, Python 3.11+, Docker Desktop (for
+Qdrant), and Ollama. No cloud account or API key is required.
 
-> **RAM is the hard constraint.** The embedding model (BGE-M3, ~2.5 GB)
-> and the LLM are resident at the same time.
->
-> **Recommended for 16 GB RAM: `qwen3:4b`.**
-> Larger models require additional memory depending on the embedding
-> model and runtime. The shipped default is `qwen3:8b` — use it only with
-> comfortable headroom beyond 16 GB.
+### Hardware requirements
+
+- **Minimum practical setup:** 16 GB RAM, 4 CPU cores, and at least 10 GB of
+  free disk space for dependencies, the BGE-M3 model, Qdrant data, and one
+  small Ollama model. CPU-only operation works but is slower.
+- **Recommended:** 32 GB RAM and an NVIDIA GPU with 8 GB+ VRAM, or Apple
+  Silicon with sufficient unified memory.
+- **16 GB RAM:** use `qwen3:4b`; keep other heavy applications closed.
+- **32 GB+ RAM:** `qwen3:8b` is a reasonable default. Larger models need more
+  memory and are not required by the project.
+
+The embedding model (BGE-M3, roughly 2.5 GB) and the local LLM are resident at
+the same time. The first ingestion also downloads BGE-M3 weights. RAM is the
+hard constraint: `qwen3:4b` is the practical starting point on 16 GB machines.
+
 
 ### First-time Ollama setup
 
@@ -364,7 +391,9 @@ docker compose up -d
 
 # 2. Backend
 cd backend
-python -m venv .venv && .venv/Scripts/activate   # Windows
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1                   # Windows PowerShell
+# .venv/Scripts/activate                         # Windows cmd.exe
 # source .venv/bin/activate                      # macOS / Linux
 pip install -r requirements.txt                  # torch resolves to the CPU build
 uvicorn app.main:app --reload --port 8000
@@ -373,6 +402,17 @@ uvicorn app.main:app --reload --port 8000
 npm install
 npm run dev
 ```
+
+Open the URL printed by Vite, usually `http://localhost:5173`. In the app,
+upload the shipped fictional sample at `examples/sample-handbook.txt`; wait
+for indexing to reach `ready`, then open Retrieval or Playground.
+
+Verify a clean setup before uploading: `http://localhost:8000/docs` should
+load the FastAPI docs, and the app should show the local backend and Qdrant
+status. The first ingestion downloads BGE-M3 and can take several minutes.
+
+For local overrides, copy `backend/.env.example` to `backend/.env`. The file
+contains safe defaults only; never commit `backend/.env`.
 
 ### Optional configuration (env, all defaulted in `backend/app/settings.py`)
 
@@ -428,3 +468,6 @@ Everything runs on your machine. Nothing phones home.
 ## License
 
 [MIT](./LICENSE)
+
+Release copy, suggested GitHub topics, and the LinkedIn/X post are in
+[`docs/release-copy.md`](docs/release-copy.md).
