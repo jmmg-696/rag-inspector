@@ -197,7 +197,7 @@ Error codes: `unsupported_type`, `empty_document`, `invalid_file`,
 | `RAG_INSPECTOR_QDRANT_URL` | `http://127.0.0.1:6333` | or `:memory:` in-process |
 | `RAG_INSPECTOR_QDRANT_COLLECTION` | `rag_inspector` | collection name |
 | `OLLAMA_BASE_URL` | `http://127.0.0.1:11434` | local Ollama server |
-| `OLLAMA_MODEL` | `qwen3:8b` | default generation model |
+| `OLLAMA_MODEL` | `qwen3:8b` | default generation model — `qwen3:4b` recommended on 16 GB RAM (see root README) |
 | `OLLAMA_TIMEOUT_SECONDS` | `600` | generation timeout (CPU runs are slow) |
 | `RAG_LLM_THINKING` | off | enable reasoning-mode models (qwen3) |
 | `RAG_MAX_CONTEXT_TOKENS` | `4000` | whole-chunk context budget (estimated tokens) |

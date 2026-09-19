@@ -59,6 +59,7 @@ GOLDEN DATASET → anchors resolved against indexed chunks → per-question
 - **Ollama** (running as a native local process — not forced into Docker,
   so GPU setups work naturally) with a **configurable model**:
   `OLLAMA_MODEL=qwen3:8b` by default, any locally installed model works
+  (`qwen3:4b` recommended on 16 GB RAM machines — see Local Development)
 - The generation API owns the full orchestration: retrieval → context →
   prompt → Ollama. The frontend never stitches these steps together itself
 - **Context budget**: whole chunks are packed in rank order up to
@@ -328,6 +329,14 @@ it never duplicates them.
 Requires Node.js 20+, Python 3.11+, Docker (for Qdrant) and Ollama (for
 generation).
 
+> **RAM is the hard constraint.** The embedding model (BGE-M3, ~2.5 GB)
+> and the LLM are resident at the same time.
+>
+> **Recommended for 16 GB RAM: `qwen3:4b`.**
+> Larger models require additional memory depending on the embedding
+> model and runtime. The shipped default is `qwen3:8b` — use it only with
+> comfortable headroom beyond 16 GB.
+
 ### First-time Ollama setup
 
 1. Install Ollama natively for your OS (https://ollama.com/download).
@@ -335,18 +344,17 @@ generation).
    that's why it is **not** forced into Docker here.
 2. Start the server: `ollama serve` (the desktop app does this for you).
 3. Pull the model you intend to use, explicitly — RAG Inspector never
-   downloads models for you:
+   downloads models for you. On a 16 GB machine, start with:
    ```bash
-   ollama pull qwen3:8b
+   ollama pull qwen3:4b
    ```
-   (Change the default with `OLLAMA_MODEL=<name>` after pulling.)
+   and point the backend at it with `OLLAMA_MODEL=qwen3:4b` (the shipped
+   default, `qwen3:8b`, only pays off with more headroom).
 
-Model size and generation speed depend entirely on your hardware; qwen3:8b
-runs on CPU but slowly. RAM is the hard constraint: BGE-M3 (~2.5 GB) and an
-8B LLM (~5.5 GB) resident at once need a comfortable 16 GB+ headroom — on a
-tighter machine point `OLLAMA_MODEL` (or the Playground model selector) at a
-smaller model, e.g. `qwen3:4b`. On CPU, Ollama's "thinking" mode is disabled
-by default (`RAG_LLM_THINKING=1` enables it) to keep first runs usable.
+Generation speed depends entirely on your hardware: on CPU expect seconds
+per answer with a 4B model and minutes with an 8B one. On CPU, Ollama's
+"thinking" mode is disabled by default (`RAG_LLM_THINKING=1` enables it) to
+keep first runs usable.
 
 ### Run everything
 
@@ -371,7 +379,7 @@ npm run dev
 | Variable | Default |
 |---|---|
 | `OLLAMA_BASE_URL` | `http://127.0.0.1:11434` |
-| `OLLAMA_MODEL` | `qwen3:8b` |
+| `OLLAMA_MODEL` | `qwen3:8b` (`qwen3:4b` on 16 GB RAM) |
 | `OLLAMA_TIMEOUT_SECONDS` | `600` |
 | `RAG_LLM_THINKING` | off |
 | `RAG_MAX_CONTEXT_TOKENS` | `4000` |
